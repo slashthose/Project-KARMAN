@@ -586,26 +586,26 @@ async function loadNewsroomData(forceRefresh = false) {
     const items = await KarmanAPI.getNewsroom(forceRefresh);
     if (items && items.length > 0) {
       container.innerHTML = items.map((item, i) => `
-        <div class="scheme-row ${i === 0 ? 'gold' : ''}" style="transition:all 0.15s ease; cursor:pointer;" onclick="window.open('${item.official_url}', '_blank')">
-          <div class="info" style="flex:1;">
-            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:4px;">
-              <span class="name" style="font-size:1.02rem; font-weight:700; color:var(--navy-dark);">${item.title}</span>
-              <span style="background:${item.is_live ? '#EAFBF1' : 'var(--blue-badge)'}; color:${item.is_live ? '#0E7B3E' : 'var(--blue-text)'}; border:1px solid ${item.is_live ? '#B7E9CB' : '#D0E1F4'}; font-size:.68rem; font-weight:700; padding:2px 8px; border-radius:9999px;">
+        <div class="scheme-row ${i === 0 ? 'gold' : ''}" onclick="window.open('${item.official_url}', '_blank')">
+          <div class="info">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
+              <span style="background:${item.is_live ? '#EAFBF1' : 'var(--blue-badge)'}; color:${item.is_live ? '#0E7B3E' : 'var(--blue-text)'}; border:1px solid ${item.is_live ? '#B7E9CB' : '#D0E1F4'}; font-size:.68rem; font-weight:700; padding:2px 9px; border-radius:9999px;">
                 ${item.is_live ? '● ' : ''}${item.badge || 'OFFICIAL NOTICE'}
               </span>
-              <span style="font-size:.72rem; color:var(--ink-sub); font-family:var(--font-mono);">
-                ${item.published_date ? '📅 ' + item.published_date : ''}
+              <span style="font-size:.74rem; color:var(--ink-sub); font-weight:500;">
+                📅 ${item.published_date || 'Recent'}
               </span>
             </div>
-            <div class="desc" style="font-size:0.86rem; color:var(--ink-sub); line-height:1.5; margin-bottom:6px;">${item.summary}</div>
-            <div style="display:flex; gap:16px; font-size:.76rem; color:var(--ink-sub); flex-wrap:wrap;">
-              <span>🏛️ <strong>Source:</strong> ${item.source_name || item.source_document || 'Govt Gazette'}</span>
-              <span>🎯 <strong>Eligibility:</strong> ${item.relevant_to || 'National Beneficiaries'}</span>
+            <div class="name">${item.title}</div>
+            <div class="desc">${item.summary}</div>
+            <div style="display:flex; gap:14px; margin-top:10px; font-size:.76rem; color:#475569; flex-wrap:wrap;">
+              <span style="background:#F1F5F9; padding:2px 8px; border-radius:6px; font-weight:600;">🏛️ ${item.source_name || item.source_document || 'Govt Gazette'}</span>
+              <span style="background:#F8FAFC; padding:2px 8px; border-radius:6px; color:#334155;">🎯 <strong>Eligibility:</strong> ${item.relevant_to || 'National Beneficiaries'}</span>
             </div>
           </div>
-          <div style="text-align:right; min-width:130px; flex-shrink:0;">
-            <div class="amount" style="font-size:0.92rem; font-weight:700; color:var(--navy-dark); margin-bottom:4px;">${item.amount || 'Govt Grant'}</div>
-            <a href="${item.official_url}" target="_blank" onclick="event.stopPropagation();" style="display:inline-flex; align-items:center; gap:4px; font-size:0.75rem; font-weight:700; color:var(--blue-text); text-decoration:none;">
+          <div style="text-align:right; min-width:145px; flex-shrink:0; display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+            <div class="amount">${item.amount || 'Govt Grant'}</div>
+            <a href="${item.official_url}" target="_blank" onclick="event.stopPropagation();" style="display:inline-flex; align-items:center; gap:4px; font-size:0.76rem; font-weight:600; padding:5px 12px; border-radius:6px; background:#FAF8F4; border:1px solid var(--border-light); color:var(--navy-dark); text-decoration:none; transition:all 0.15s ease;">
               Official Notice ↗
             </a>
           </div>

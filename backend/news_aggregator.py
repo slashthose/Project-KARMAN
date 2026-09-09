@@ -174,6 +174,11 @@ def fetch_live_government_news() -> List[Dict[str, Any]]:
                     clean_desc = clean_html_text(raw_desc)
                     cat_info = categorize_news_item(clean_title, clean_desc)
 
+                    if clean_desc.lower().startswith(clean_title.lower()[:25]) or len(clean_desc) < 15:
+                        summary_text = f"Official policy release and scheme guidelines published by {raw_source}. Eligible beneficiaries can review the announcement and application criteria."
+                    else:
+                        summary_text = clean_desc
+
                     clean_date = raw_pubdate
                     try:
                         parsed_dt = datetime.strptime(raw_pubdate[:25].strip(), "%a, %d %b %Y %H:%M:%S")
@@ -186,7 +191,7 @@ def fetch_live_government_news() -> List[Dict[str, Any]]:
                         "title": clean_title,
                         "category": cat_info["category"],
                         "badge": cat_info["badge"],
-                        "summary": clean_desc if len(clean_desc) > 20 else f"Official update regarding {clean_title}. Published by {raw_source} for national beneficiaries.",
+                        "summary": summary_text,
                         "relevant_to": cat_info["relevant_to"],
                         "amount": cat_info["amount"],
                         "source_name": raw_source,
