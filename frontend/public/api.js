@@ -1,7 +1,7 @@
 // KARMAN API Client — Dual Base URL with resilient auto-fallback
 const API_CONFIG = {
   LOCAL_BASE: "http://localhost:8000",
-  CLOUD_BASE: "https://sih-work.onrender.com",
+  CLOUD_BASE: "https://project-karman.onrender.com",
   TIMEOUT_MS: 4000
 };
 
