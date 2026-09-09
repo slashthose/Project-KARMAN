@@ -12,12 +12,12 @@
 <link rel="stylesheet" href="styles.css">
 <style>
   :root {
-    --step-active: #14243B;
-    --step-done: #14243B;
+    --step-active: #162035;
+    --step-done: #2E6829;
     --step-pending: #C2BBB0;
   }
   body.welcome-body {
-    background: #F9FAFB;
+    background: #FAF8F4;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -49,9 +49,9 @@
     display: block;
   }
   .sih-badge {
-    background: #EEF3F8;
-    color: #66707A;
-    border: 1px solid #DCE0E6;
+    background: #FFF3D6;
+    color: #8C651F;
+    border: 1px solid #E8D29F;
     padding: 3px 8px;
     border-radius: 999px;
     font-size: 0.72rem;
@@ -106,7 +106,7 @@
   }
   .step-node.active .step-circle {
     background: var(--navy-dark);
-    color: #14243B;
+    color: #162035;
   }
   .step-node.completed .step-circle {
     background: var(--green-badge);
@@ -164,7 +164,7 @@
     margin-bottom: 28px;
   }
   .welcome-pill-card {
-    background: #F9FAFB;
+    background: #FAF8F4;
     border: 1px solid #E5E7EB;
     border-radius: 12px;
     padding: 16px;
@@ -210,7 +210,7 @@
     background: var(--navy-dark);
   }
   .demo-login-strip {
-    background: #F9FAFB;
+    background: #FAF8F4;
     border: 1px dashed #C8BFA8;
     border-radius: 10px;
     padding: 14px 18px;
@@ -238,7 +238,7 @@
   }
   .btn-demo-quick:hover {
     border-color: var(--navy-dark);
-    background: #14243B;
+    background: #162035;
   }
   .profile-form-grid {
     display: grid;
@@ -292,7 +292,7 @@
     margin-bottom: 16px;
   }
   .diagnostic-result-strip {
-    background: #F9FAFB;
+    background: #FAF8F4;
     border: 1px solid #E5E7EB;
     border-radius: 14px;
     padding: 22px;
@@ -426,7 +426,7 @@
         </div>
         <div class="welcome-pill-card">
           <h4>
-            <span style="color:#14243B;">💰</span> Government Scheme Grants
+            <span style="color:#2E6829;">💰</span> Government Scheme Grants
           </h4>
           <p>Direct linkage to PM-AJAY (up to ₹50,000 tool subsidy), PM-Vishwakarma, and PMKVY RPL certification.</p>
         </div>
@@ -438,7 +438,7 @@
         </div>
       </div>
 
-      <div style="background:#F9FAFB; border-radius:10px; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; font-size:.82rem; color:var(--ink-sub);">
+      <div style="background:#FAF8F4; border-radius:10px; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; font-size:.82rem; color:var(--ink-sub);">
         <span>Already have an account? Skip directly to sign-in.</span>
         <button class="btn-ghost" style="font-size:.78rem; padding:5px 12px; background:#fff; cursor:pointer;" onclick="goToStep(2, 'login')">Sign In to Existing Account →</button>
       </div>
@@ -714,7 +714,7 @@
         const headerBtn = document.getElementById('header-workspace-btn');
         if (headerBtn) {
           headerBtn.innerText = 'Enter Workspace →';
-          headerBtn.style.background = '#14243B';
+          headerBtn.style.background = '#162035';
           headerBtn.style.color = '#fff';
         }
       }
