@@ -24,6 +24,7 @@ from database import (
 )
 from ai_engine import process_beneficiary_query
 from pdf_generator import generate_applicant_pdf, generate_skill_resume_pdf
+from news_aggregator import get_live_scheme_news, refresh_scheme_news_cache
 
 load_dotenv()
 
@@ -589,6 +590,32 @@ def check_ats_resume(req: ATSCheckRequest):
         "matching_keywords": ["wiring", "earthing", "multimeter"],
         "missing_keywords": ["conduit layout", "megger test"]
     }
+
+# ==========================================
+# LIVE SCHEME NEWSROOM APIS
+# ==========================================
+@app.get("/api/worker/newsroom")
+def get_worker_newsroom():
+    """Returns live government scheme news & policy releases."""
+    return get_live_scheme_news()
+
+@app.get("/api/newsroom")
+def get_newsroom_feed():
+    """Returns structured live newsroom feed with metadata."""
+    items = get_live_scheme_news()
+    return {
+        "status": "success",
+        "count": len(items),
+        "source": "live_government_feeds",
+        "items": items
+    }
+
+@app.post("/api/worker/newsroom/refresh")
+@app.post("/api/newsroom/refresh")
+def force_refresh_newsroom():
+    """Forces an immediate re-fetch of government scheme feeds."""
+    return refresh_scheme_news_cache()
+
 
 if __name__ == "__main__":
     import uvicorn

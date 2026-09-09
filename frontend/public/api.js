@@ -180,9 +180,14 @@ const KarmanAPI = {
   },
 
   // Schemes & Policy Newsroom
-  async getNewsroom() {
-    const remote = await requestApi("/api/worker/newsroom");
-    if (remote) return remote;
+  async getNewsroom(forceRefresh = false) {
+    const endpoint = forceRefresh ? "/api/worker/newsroom/refresh" : "/api/worker/newsroom";
+    const method = forceRefresh ? "POST" : "GET";
+    const remote = await requestApi(endpoint, { method });
+    if (remote) {
+      if (Array.isArray(remote)) return remote;
+      if (remote.items && Array.isArray(remote.items)) return remote.items;
+    }
 
     return [
       {

@@ -550,35 +550,76 @@ async function exportResumePdf() {
   }
 }
 
-// Live Scheme Newsroom Loader
-async function loadNewsroomData() {
+// Live Scheme Newsroom Loader & Live Poller
+async function refreshNewsroomData(force = false) {
+  const icon = document.getElementById('news-refresh-icon');
+  const btn = document.getElementById('btn-refresh-newsroom');
+  if (icon) {
+    icon.style.display = 'inline-block';
+    icon.style.transform = 'rotate(180deg)';
+    icon.style.transition = 'transform 0.4s ease';
+  }
+  if (btn) btn.disabled = true;
+
+  try {
+    await loadNewsroomData(force);
+  } finally {
+    if (icon) icon.style.transform = '';
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function loadNewsroomData(forceRefresh = false) {
   const container = document.getElementById('newsroom-list-container');
   if (!container) return;
 
+  if (forceRefresh) {
+    container.innerHTML = `
+      <div style="text-align:center; padding:36px 16px; color:var(--ink-sub);">
+        <div style="font-size:1.5rem; margin-bottom:8px;">⏳</div>
+        <strong style="font-size:0.95rem; display:block; margin-bottom:4px; color:var(--navy-dark);">Fetching Live Government Notifications...</strong>
+        <span style="font-size:0.8rem;">Querying Press Information Bureau (PIB), MSDE, and Skill India feeds</span>
+      </div>`;
+  }
+
   try {
-    const items = await KarmanAPI.getNewsroom();
+    const items = await KarmanAPI.getNewsroom(forceRefresh);
     if (items && items.length > 0) {
       container.innerHTML = items.map((item, i) => `
-        <div class="scheme-row ${i === 0 ? 'gold' : ''}" onclick="window.open('${item.official_url}', '_blank')">
-          <div class="info">
-            <div style="display:flex; align-items:center; gap:8px;">
-              <span class="name">${item.title}</span>
-              <span style="background:var(--blue-badge); color:var(--blue-text); font-size:.7rem; font-weight:700; padding:2px 8px; border-radius:8px;">${item.badge || 'ACTIVE'}</span>
+        <div class="scheme-row ${i === 0 ? 'gold' : ''}" style="transition:all 0.15s ease; cursor:pointer;" onclick="window.open('${item.official_url}', '_blank')">
+          <div class="info" style="flex:1;">
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:4px;">
+              <span class="name" style="font-size:1.02rem; font-weight:700; color:var(--navy-dark);">${item.title}</span>
+              <span style="background:${item.is_live ? '#EAFBF1' : 'var(--blue-badge)'}; color:${item.is_live ? '#0E7B3E' : 'var(--blue-text)'}; border:1px solid ${item.is_live ? '#B7E9CB' : '#D0E1F4'}; font-size:.68rem; font-weight:700; padding:2px 8px; border-radius:9999px;">
+                ${item.is_live ? '● ' : ''}${item.badge || 'OFFICIAL NOTICE'}
+              </span>
+              <span style="font-size:.72rem; color:var(--ink-sub); font-family:var(--font-mono);">
+                ${item.published_date ? '📅 ' + item.published_date : ''}
+              </span>
             </div>
-            <div class="desc">${item.summary}</div>
-            <div style="font-size:.75rem; color:var(--ink-sub); margin-top:4px;">Official Source: ${item.source_document || 'Govt Gazette'} (Relevant: ${item.relevant_to || 'Artisans'})</div>
+            <div class="desc" style="font-size:0.86rem; color:var(--ink-sub); line-height:1.5; margin-bottom:6px;">${item.summary}</div>
+            <div style="display:flex; gap:16px; font-size:.76rem; color:var(--ink-sub); flex-wrap:wrap;">
+              <span>🏛️ <strong>Source:</strong> ${item.source_name || item.source_document || 'Govt Gazette'}</span>
+              <span>🎯 <strong>Eligibility:</strong> ${item.relevant_to || 'National Beneficiaries'}</span>
+            </div>
           </div>
-          <div style="text-align:right;">
-            <div class="amount">${item.amount || 'Govt Grant'}</div>
-            <div class="status">Click for Details →</div>
+          <div style="text-align:right; min-width:130px; flex-shrink:0;">
+            <div class="amount" style="font-size:0.92rem; font-weight:700; color:var(--navy-dark); margin-bottom:4px;">${item.amount || 'Govt Grant'}</div>
+            <a href="${item.official_url}" target="_blank" onclick="event.stopPropagation();" style="display:inline-flex; align-items:center; gap:4px; font-size:0.75rem; font-weight:700; color:var(--blue-text); text-decoration:none;">
+              Official Notice ↗
+            </a>
           </div>
         </div>
       `).join('');
+    } else {
+      container.innerHTML = '<p style="color:var(--ink-sub); font-size:.88rem;">No recent updates found. Click "Fetch Latest Govt News" above to retry.</p>';
     }
   } catch (err) {
     console.warn("Could not fetch remote newsroom:", err);
+    container.innerHTML = '<p style="color:#DC2626; font-size:.88rem;">Unable to connect to live government feed. Please check internet connectivity and retry.</p>';
   }
 }
+
 
 // Live Roadmap Stage Loader & Dynamic Role Switcher
 let currentRoadmapRole = 'AI / ML Engineer';
