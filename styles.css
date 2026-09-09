@@ -1,4 +1,6 @@
 :root {
+  --dark-accent: #162035;
+  --accent-tint: #FAF1D6;
   --yellow-hero: #F4C542;
   --yellow-accent: #F6C851;
   --navy-dark: #162035;
@@ -801,23 +803,13 @@ body.dashboard-page {
 .site-view.active { display: block; }
 
 .hero-viewport-screen {
-  min-height: 100vh;
-  height: 100vh;
+  min-height: auto;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  background: #EAE6DF;
-  overflow: hidden;
+  background: var(--paper-bg);
   position: relative;
   box-sizing: border-box;
-}
-
-@media (max-height: 700px), (max-width: 900px) {
-  .hero-viewport-screen {
-    height: auto;
-    min-height: 100vh;
-    overflow-y: auto;
-  }
+  border-bottom: 1px solid var(--border-light);
 }
 
 .site-header {
@@ -839,6 +831,35 @@ body.dashboard-page {
   justify-content: space-between;
   box-sizing: border-box;
 }
+
+.site-brand-logo {
+  height: 38px;
+  width: auto;
+  max-width: 170px;
+  object-fit: contain;
+  display: block;
+}
+
+.nav-welcome-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  background: #EAE6DF;
+  color: var(--navy-dark) !important;
+  font-weight: 700 !important;
+  font-size: 0.82rem !important;
+  border: 1px solid var(--border-light);
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+.nav-welcome-pill:hover {
+  background: var(--yellow-hero);
+  border-color: var(--navy-dark);
+  transform: translateY(-1px);
+}
+
 .site-brand {
   display: flex;
   align-items: center;
@@ -880,7 +901,7 @@ body.dashboard-page {
   max-width: 1360px;
   width: 100%;
   margin: 0 auto;
-  padding: clamp(8px, 1.5vh, 18px) clamp(16px, 2.5vw, 32px);
+  padding: clamp(32px, 5vh, 56px) clamp(16px, 2.5vw, 32px);
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
   gap: clamp(20px, 3.5vw, 48px);
@@ -934,8 +955,8 @@ body.dashboard-page {
   flex-wrap: wrap;
 }
 .btn-hero-primary {
-  background: var(--dark-accent);
-  color: #fff;
+  background: var(--navy-dark);
+  color: #FFFFFF !important;
   font-weight: 600;
   font-size: .88rem;
   padding: 10px 22px;
@@ -1046,10 +1067,10 @@ body.dashboard-page {
   font-size: .78rem;
   z-index: 3;
 }
-.hero-mini-stat.a { top: 10px; right: -8px; }
+.hero-mini-stat.a { top: 12px; right: 2px; }
 .hero-mini-stat.b {
-  bottom: -12px;
-  left: -10px;
+  bottom: -4px;
+  left: 4px;
   background: var(--yellow-hero);
   color: var(--navy-dark);
   border: 1.5px solid var(--navy-dark);
@@ -1547,3 +1568,49 @@ body.dashboard-page {
   .center-hero-banner { flex-direction: column; align-items: flex-start; gap: 16px; }
   .banner-img-thumb { display: none; }
 }
+
+/* INTERACTIVE WORKFLOW MODAL OVERLAYS */
+.workflow-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(17, 24, 39, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+
+.workflow-modal-backdrop.open {
+  display: flex;
+  opacity: 1;
+}
+
+.workflow-modal-window {
+  background: #FFFFFF;
+  border-radius: 20px;
+  border: 1.5px solid var(--border-light);
+  box-shadow: 0 24px 60px rgba(17, 24, 39, 0.25);
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 32px 28px;
+  box-sizing: border-box;
+  animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+@keyframes modalPop {
+  from { transform: scale(0.96) translateY(12px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
