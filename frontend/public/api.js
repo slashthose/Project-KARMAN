@@ -278,5 +278,56 @@ const KarmanAPI = {
       grant_amount: "₹50,000 Assistance",
       pdf_url: "#"
     };
+  },
+
+  // Day 1: MongoDB Profile Persistence
+  async getProfile(userId) {
+    const remote = await requestApi(`/api/profile/${encodeURIComponent(userId)}`);
+    if (remote) return remote;
+
+    const saved = localStorage.getItem('karman_user_profile');
+    return saved ? JSON.parse(saved) : null;
+  },
+
+  async saveProfile(profileData) {
+    const remote = await requestApi("/api/profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(profileData)
+    });
+
+    if (remote) {
+      localStorage.setItem('karman_user_profile', JSON.stringify(remote.profile || profileData));
+      return remote;
+    }
+
+    localStorage.setItem('karman_user_profile', JSON.stringify(profileData));
+    return { status: "success", profile: profileData };
+  },
+
+  // Day 1: MongoDB Skills Persistence
+  async getSkills(userId) {
+    const remote = await requestApi(`/api/skills/${encodeURIComponent(userId)}`);
+    if (remote) return remote;
+
+    const saved = localStorage.getItem('karman_user_skills');
+    return saved ? JSON.parse(saved) : { user_id: userId, skills_list: [], tools_handled: [] };
+  },
+
+  async saveSkills(skillsData) {
+    const remote = await requestApi("/api/skills", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(skillsData)
+    });
+
+    if (remote) {
+      localStorage.setItem('karman_user_skills', JSON.stringify(remote.skills || skillsData));
+      return remote;
+    }
+
+    localStorage.setItem('karman_user_skills', JSON.stringify(skillsData));
+    return { status: "success", skills: skillsData };
   }
 };
+

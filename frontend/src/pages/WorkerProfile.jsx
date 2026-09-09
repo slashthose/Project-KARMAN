@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
-import { User, Wrench, CheckCircle2, ShieldCheck, Save, Award } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { User, Wrench, CheckCircle2, ShieldCheck, Save, Award, RefreshCw } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function WorkerProfile() {
   const { user } = useAuth();
+  const userId = user?.identifier || localStorage.getItem('karman_user_id') || 'sunita@karman.gov.in';
 
   const [profile, setProfile] = useState({
-    name: user?.name || 'Rekha Devi',
+    name: user?.name || 'Sunita Devi',
     phone: '919876543210',
     trade: 'Tailoring & Sewing',
-    experience: '6 Years (Informal)',
+    experience: '5 Years (Informal)',
     state: 'Uttar Pradesh',
     district: 'Varanasi',
     nsqf_code: 'Sewing Machine Operator (AMH/Q0301)',
@@ -17,11 +18,66 @@ export default function WorkerProfile() {
   });
 
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const handleSave = (e) => {
+  // Day 1: Hydrate live profile from MongoDB Atlas on page load
+  useEffect(() => {
+    let isMounted = true;
+    async function loadRemoteProfile() {
+      try {
+        const res = await fetch(`/api/profile/${encodeURIComponent(userId)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted) {
+            setProfile(prev => ({
+              ...prev,
+              name: data.full_name || prev.name,
+              phone: data.phone_number || prev.phone,
+              district: data.district || prev.district,
+              trade: data.target_trade || prev.trade,
+              experience: `${data.years_experience || 5} Years (Informal)`
+            }));
+          }
+        }
+      } catch (err) {
+        console.warn("Could not load remote profile from MongoDB:", err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+    loadRemoteProfile();
+    return () => { isMounted = false; };
+  }, [userId]);
+
+  // Day 1: Save updated profile to MongoDB Atlas
+  const handleSave = async (e) => {
     e.preventDefault();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    setSaved(false);
+    try {
+      const payload = {
+        user_id: userId,
+        full_name: profile.name,
+        phone_number: profile.phone,
+        education_level: "10th Pass / RPL Candidate",
+        district: profile.district,
+        target_trade: profile.trade,
+        years_experience: parseFloat(profile.experience) || 5.0,
+        current_status: "Informal Worker"
+      };
+
+      const res = await fetch('/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3500);
+      }
+    } catch (err) {
+      console.error("Failed to save profile in MongoDB Atlas:", err);
+    }
   };
 
   return (

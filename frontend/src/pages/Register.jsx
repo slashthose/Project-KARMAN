@@ -30,6 +30,36 @@ export default function Register() {
           password: password
         })
       });
+
+      const profilePayload = {
+        user_id: identifier,
+        full_name: name,
+        phone_number: "",
+        education_level: userType === 'student' ? "Undergraduate / Graduate" : "10th Pass / Informal Worker",
+        district: "General",
+        target_trade: userType === 'student' ? "AI / ML Engineer" : "Tailoring & Sewing",
+        years_experience: userType === 'student' ? 1.0 : 3.0,
+        current_status: userType === 'student' ? "Student" : "Informal Worker"
+      };
+
+      // Day 1: Centralize profile in MongoDB Atlas
+      try {
+        await fetch('/api/profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(profilePayload)
+        });
+      } catch (profileErr) {
+        console.warn('Profile sync fallback:', profileErr);
+      }
+
+      localStorage.setItem('karman_user_id', identifier);
+      localStorage.setItem('karman_user', JSON.stringify({
+        name: name,
+        identifier: identifier,
+        role: userType
+      }));
+
       if (res.ok) {
         const data = await res.json();
         navigate(data.redirect_url || '/dashboard');
@@ -38,6 +68,12 @@ export default function Register() {
       }
     } catch (err) {
       console.warn('Backend register unavailable, redirecting to dashboard:', err);
+      localStorage.setItem('karman_user_id', identifier);
+      localStorage.setItem('karman_user', JSON.stringify({
+        name: name,
+        identifier: identifier,
+        role: userType
+      }));
       navigate('/dashboard');
     } finally {
       setLoading(false);

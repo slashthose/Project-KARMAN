@@ -19,7 +19,11 @@ frontend/dist/
 frontend/dist-ssr/
 *.local
 
-# System
+# System & Binaries
 .DS_Store
 Thumbs.db
 .vscode/
+*.exe
+cloudflared.exe
+backend/cloudflared.exe
+backend/static/*.pdf

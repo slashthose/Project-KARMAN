@@ -35,23 +35,104 @@ const rolePresets = {
 
 let currentRole = 'AI / ML Engineer';
 
-// Initialize User Profile from Session / LocalStorage
-function initUserProfile() {
-  const savedUser = localStorage.getItem('karman_user');
-  if (savedUser) {
+// Initialize User Profile from Live MongoDB Atlas with Session Fallback
+async function initUserProfile() {
+  const savedUserStr = localStorage.getItem('karman_user');
+  let userId = localStorage.getItem('karman_user_id');
+  let localUser = null;
+  
+  if (savedUserStr) {
     try {
-      const user = JSON.parse(savedUser);
-      const nameEl = document.getElementById('user-greeting-name');
-      const profileNameInput = document.getElementById('setting-full-name');
-      const builderName = document.getElementById('builder-name');
-      if (nameEl && user.name) nameEl.innerText = user.name;
-      if (profileNameInput && user.name) profileNameInput.value = user.name;
-      if (builderName && user.name) builderName.value = user.name;
+      localUser = JSON.parse(savedUserStr);
+      if (!userId && localUser.identifier) {
+        userId = localUser.identifier;
+      }
     } catch (e) {
       console.warn("Could not parse user session:", e);
     }
   }
+
+  // Fallback default test user if none in storage
+  if (!userId) {
+    userId = 'sunita@karman.gov.in';
+  }
+
+  // Pre-fill immediately from local session to avoid UI flicker
+  if (localUser && localUser.name) {
+    applyProfileToDOM({
+      full_name: localUser.name,
+      target_trade: localUser.role || 'AI / ML Engineer'
+    });
+  }
+
+  // Hydrate live from MongoDB Atlas backend
+  try {
+    const profile = await KarmanAPI.getProfile(userId);
+    if (profile) {
+      applyProfileToDOM(profile);
+    }
+  } catch (err) {
+    console.warn("Could not fetch live profile from MongoDB Atlas:", err);
+  }
 }
+
+function applyProfileToDOM(profile) {
+  if (!profile) return;
+  const nameEl = document.getElementById('user-greeting-name');
+  const profileNameInput = document.getElementById('setting-full-name');
+  const builderName = document.getElementById('builder-name');
+  const builderPhone = document.getElementById('builder-phone');
+  const builderDistrict = document.getElementById('builder-district');
+  const builderTrade = document.getElementById('builder-trade');
+
+  if (nameEl && profile.full_name) nameEl.innerText = profile.full_name;
+  if (profileNameInput && profile.full_name) profileNameInput.value = profile.full_name;
+  if (builderName && profile.full_name) builderName.value = profile.full_name;
+  if (builderPhone && profile.phone_number) builderPhone.value = profile.phone_number;
+  if (builderDistrict && profile.district) builderDistrict.value = profile.district;
+  if (builderTrade && profile.target_trade) {
+    for (let i = 0; i < builderTrade.options.length; i++) {
+      if (builderTrade.options[i].text.includes(profile.target_trade) || builderTrade.options[i].value.includes(profile.target_trade)) {
+        builderTrade.selectedIndex = i;
+        break;
+      }
+    }
+  }
+}
+
+// Day 1: Save Live User Profile to MongoDB Atlas (replaces direct localStorage.setItem)
+async function saveLiveUserProfile(updatedFields = {}) {
+  const userId = localStorage.getItem('karman_user_id') || 'sunita@karman.gov.in';
+  const nameInput = document.getElementById('setting-full-name');
+  const builderPhone = document.getElementById('builder-phone');
+  const builderDistrict = document.getElementById('builder-district');
+
+  const profilePayload = {
+    user_id: userId,
+    full_name: (nameInput ? nameInput.value : null) || updatedFields.full_name || "Sunita Devi",
+    phone_number: (builderPhone ? builderPhone.value : null) || updatedFields.phone_number || "919876543210",
+    education_level: updatedFields.education_level || "10th Pass / RPL Qualified",
+    district: (builderDistrict ? builderDistrict.value : null) || updatedFields.district || "G.B. Nagar",
+    target_trade: updatedFields.target_trade || currentRole || "Tailoring & Sewing",
+    years_experience: updatedFields.years_experience || 5.0,
+    current_status: updatedFields.current_status || "Informal Worker",
+    ...updatedFields
+  };
+
+  try {
+    const res = await KarmanAPI.saveProfile(profilePayload);
+    applyProfileToDOM(profilePayload);
+    localStorage.setItem('karman_user', JSON.stringify({
+      name: profilePayload.full_name,
+      identifier: userId,
+      role: profilePayload.target_trade
+    }));
+    return res;
+  } catch (err) {
+    console.error("Error saving profile to MongoDB:", err);
+  }
+}
+
 
 // Page Navigation
 function showPage(pageId) {
@@ -369,13 +450,71 @@ function tgReply(btn) {
   sendTgUserMessage(btn.textContent);
 }
 
-function handleTgInputKey(e) {
-  if (e.key === 'Enter') {
-    const input = document.getElementById('tg-user-input');
-    if (input && input.value.trim()) {
-      sendTgUserMessage(input.value.trim());
-      input.value = '';
-    }
+let recognitionInstance = null;
+let isRecordingVoice = false;
+
+function toggleVoiceInput() {
+  const micBtn = document.getElementById('tg-mic-btn');
+  const input = document.getElementById('tg-user-input');
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    alert("Voice input is supported in Google Chrome, Edge, and modern browsers via Web Speech API.");
+    return;
+  }
+
+  if (isRecordingVoice && recognitionInstance) {
+    recognitionInstance.stop();
+    return;
+  }
+
+  try {
+    recognitionInstance = new SpeechRecognition();
+    recognitionInstance.lang = 'hi-IN'; // Default to Hindi, can detect mixed Indian English
+    recognitionInstance.interimResults = true;
+    recognitionInstance.maxAlternatives = 1;
+
+    recognitionInstance.onstart = () => {
+      isRecordingVoice = true;
+      if (micBtn) {
+        micBtn.style.background = '#FFE5E5';
+        micBtn.style.borderColor = '#FF4D4D';
+        micBtn.style.color = '#D90000';
+      }
+      if (input) input.placeholder = "Listening... बोलिए (Recording voice)...";
+    };
+
+    recognitionInstance.onresult = (event) => {
+      let speechResult = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        speechResult += event.results[i][0].transcript;
+      }
+      if (input) input.value = speechResult;
+    };
+
+    recognitionInstance.onerror = (event) => {
+      console.warn("Speech recognition warning:", event.error);
+    };
+
+    recognitionInstance.onend = () => {
+      isRecordingVoice = false;
+      if (micBtn) {
+        micBtn.style.background = '';
+        micBtn.style.borderColor = '';
+        micBtn.style.color = '';
+      }
+      if (input) {
+        input.placeholder = "Type or speak your skill (e.g., 'Mujhe silai aati hai, machine grant chahiye')…";
+        if (input.value.trim()) {
+          sendTgUserMessage(input.value.trim());
+          input.value = '';
+        }
+      }
+    };
+
+    recognitionInstance.start();
+  } catch (err) {
+    console.error("Speech recognition could not start:", err);
   }
 }
 

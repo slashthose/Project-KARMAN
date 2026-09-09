@@ -5,13 +5,30 @@ import { Wrench, BookOpen, ShieldCheck, Award, ArrowRight, Mic, Send, FileText }
 export default function WorkerDashboard() {
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userProfile, setUserProfile] = useState({
+    full_name: 'Sunita Devi',
+    target_trade: 'Tailoring & Sewing',
+    years_experience: 6.0,
+    district: 'Varanasi'
+  });
+
+  const userId = localStorage.getItem('karman_user_id') || 'sunita@karman.gov.in';
 
   useEffect(() => {
+    // Fetch live newsroom
     fetch('/api/worker/newsroom')
       .then(res => res.json())
       .then(data => { setNews(data); setLoading(false); })
       .catch(err => { console.error(err); setLoading(false); });
-  }, []);
+
+    // Day 1: Hydrate worker profile from MongoDB Atlas
+    fetch(`/api/profile/${encodeURIComponent(userId)}`)
+      .then(res => res.ok ? res.json() : null)
+      .then(profile => {
+        if (profile) setUserProfile(profile);
+      })
+      .catch(err => console.warn("Could not load worker profile from MongoDB:", err));
+  }, [userId]);
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6 font-sans bg-[#18121e] min-h-screen text-slate-100">
@@ -23,9 +40,9 @@ export default function WorkerDashboard() {
             <Wrench className="w-4 h-4" />
             <span>WORKER DESK • SKILLED ARTISAN PORTAL</span>
           </div>
-          <h1 className="text-2xl font-black text-white">Welcome to KARMAN Worker Desk</h1>
+          <h1 className="text-2xl font-black text-white">Namaste, {userProfile.full_name}</h1>
           <p className="text-xs text-slate-400 mt-1">
-            Find government schemes, NSQF trade certifications, and equipment grants related to your pre-existing skills.
+            District: {userProfile.district} • Government schemes, NSQF trade certifications, and equipment grants for you.
           </p>
         </div>
 
@@ -42,13 +59,13 @@ export default function WorkerDashboard() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 font-mono text-xs">
         <div className="bg-[#241a2c] border border-[#3d2e49] p-4 rounded-xl space-y-1">
           <div className="text-slate-400 text-[10px]">PRIMARY TRADE</div>
-          <div className="text-lg font-bold text-white">Tailoring & Sewing</div>
-          <div className="text-[10px] text-[#70a37f]">QP: AMH/Q0301</div>
+          <div className="text-lg font-bold text-white">{userProfile.target_trade}</div>
+          <div className="text-[10px] text-[#70a37f]">NSQF Level 4 Track</div>
         </div>
 
         <div className="bg-[#241a2c] border border-[#3d2e49] p-4 rounded-xl space-y-1">
           <div className="text-slate-400 text-[10px]">PRACTICAL EXPERIENCE</div>
-          <div className="text-lg font-bold text-[#79b473]">6 Years (Informal)</div>
+          <div className="text-lg font-bold text-[#79b473]">{userProfile.years_experience} Years (Informal)</div>
           <div className="text-[10px] text-slate-400">RPL Fast-Track Qualified</div>
         </div>
 

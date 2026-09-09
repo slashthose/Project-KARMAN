@@ -6,6 +6,24 @@ export default function StudentDashboard() {
   const [targetRole, setTargetRole] = useState('ai_ml_engineer');
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [studentName, setStudentName] = useState('Aarav Mehta');
+
+  const userId = localStorage.getItem('karman_user_id') || 'student@karman.gov.in';
+
+  // Day 1: Hydrate student profile from MongoDB Atlas
+  useEffect(() => {
+    fetch(`/api/profile/${encodeURIComponent(userId)}`)
+      .then(res => res.ok ? res.json() : null)
+      .then(profile => {
+        if (profile) {
+          if (profile.full_name) setStudentName(profile.full_name);
+          if (profile.target_trade && (profile.target_trade.includes('Full') || profile.target_trade.includes('Stack'))) {
+            setTargetRole('full_stack_developer');
+          }
+        }
+      })
+      .catch(err => console.warn("Could not load student profile from MongoDB:", err));
+  }, [userId]);
 
   const fetchAnalysis = async (role) => {
     setLoading(true);
@@ -43,7 +61,7 @@ export default function StudentDashboard() {
             <GraduationCap className="w-4 h-4" />
             <span>COLLEGE STUDENT CAREER LAB</span>
           </div>
-          <h1 className="text-2xl font-black text-white">Welcome back. Let's figure out what comes next.</h1>
+          <h1 className="text-2xl font-black text-white">Welcome back, {studentName}. Let's figure out what comes next.</h1>
           <p className="text-xs text-slate-400 mt-1">
             KARMAN analyzes your current profile, identifies skill gaps, and recommends targeted projects to get you career-ready.
           </p>
