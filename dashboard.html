@@ -10,6 +10,22 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<script>
+  (function() {
+    try {
+      const token = localStorage.getItem('karman_token');
+      const user = localStorage.getItem('karman_user');
+      const profileDone = localStorage.getItem('karman_profile_completed');
+      if (!token || !user) {
+        window.location.replace('welcome.html');
+      } else if (profileDone !== 'true') {
+        window.location.replace('welcome.html?step=profile');
+      }
+    } catch (e) {
+      window.location.replace('welcome.html');
+    }
+  })();
+</script>
 </head>
 <body class="dashboard-page">
 
@@ -91,7 +107,7 @@
       </div>
 
       <div class="sidebar-logout">
-        <button class="sidebar-item" onclick="localStorage.removeItem('karman_user'); localStorage.removeItem('karman_token'); window.location.href='login.html'">
+        <button class="sidebar-item" onclick="localStorage.removeItem('karman_user'); localStorage.removeItem('karman_token'); localStorage.removeItem('karman_profile_completed'); window.location.href='welcome.html'">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
           <span class="lbl">Sign Out</span>
         </button>

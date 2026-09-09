@@ -81,6 +81,10 @@ def get_login_html():
 def get_register_html():
     return FileResponse(os.path.join(ROOT_DIR, "register.html"))
 
+@app.get("/welcome.html")
+def get_welcome_html():
+    return FileResponse(os.path.join(ROOT_DIR, "welcome.html"))
+
 @app.get("/styles.css")
 def get_styles_css():
     return FileResponse(os.path.join(ROOT_DIR, "styles.css"), media_type="text/css")
@@ -190,6 +194,7 @@ class UserProfile(BaseModel):
     target_trade: str          # e.g., "Electrical", "Solar PV Installer", "Tailoring"
     years_experience: float
     current_status: str        # "Unemployed", "Informal Worker", "Student"
+    preferred_language: Optional[str] = "English"
 
 class SkillSubmission(BaseModel):
     user_id: str
