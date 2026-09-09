@@ -1,4 +1,4 @@
-// Authentication Handlers for Login and Registration with Profile Completion Check
+// Authentication Handlers for Login and Registration
 async function handleLogin(e) {
   e.preventDefault();
   const email = document.getElementById('login-email').value.trim();
@@ -16,25 +16,18 @@ async function handleLogin(e) {
       localStorage.setItem('karman_user', JSON.stringify(res.user_profile));
       localStorage.setItem('karman_token', res.token);
       localStorage.setItem('karman_user_id', email);
-
-      // Check if user already has a completed profile in MongoDB Atlas
-      const profile = await KarmanAPI.getProfile(email);
-      if (profile && profile.target_trade) {
-        localStorage.setItem('karman_profile_completed', 'true');
-        window.location.href = 'dashboard.html';
-      } else {
-        window.location.href = 'welcome.html?step=profile';
-      }
+      window.location.href = 'dashboard.html';
       return false;
     } else {
       alert("Invalid credentials. Please try again.");
     }
   } catch (err) {
     console.error(err);
+    // Fallback login
     localStorage.setItem('karman_user', JSON.stringify({ name: email.split('@')[0], identifier: email, role: 'student' }));
     localStorage.setItem('karman_token', 'token_' + Date.now());
     localStorage.setItem('karman_user_id', email);
-    window.location.href = 'welcome.html?step=profile';
+    window.location.href = 'dashboard.html';
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
@@ -72,8 +65,7 @@ async function handleSignup(e) {
       localStorage.setItem('karman_user', JSON.stringify(res.user_profile));
       localStorage.setItem('karman_token', res.token);
       localStorage.setItem('karman_user_id', email);
-      // Brand new registration requires profile completion
-      window.location.href = 'welcome.html?step=profile';
+      window.location.href = 'dashboard.html';
       return false;
     }
   } catch (err) {
@@ -81,7 +73,7 @@ async function handleSignup(e) {
     localStorage.setItem('karman_user', JSON.stringify({ name, identifier: email, role }));
     localStorage.setItem('karman_token', 'token_' + Date.now());
     localStorage.setItem('karman_user_id', email);
-    window.location.href = 'welcome.html?step=profile';
+    window.location.href = 'dashboard.html';
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
@@ -89,20 +81,4 @@ async function handleSignup(e) {
     }
   }
   return false;
-}
-
-function quickDemoAccess(type) {
-  if (type === 'student') {
-    localStorage.setItem('karman_user', JSON.stringify({ name: 'Arjun Mehta', identifier: 'arjun@karman.gov.in', role: 'student' }));
-    localStorage.setItem('karman_token', 'demo_token_arjun');
-    localStorage.setItem('karman_user_id', 'arjun@karman.gov.in');
-    localStorage.setItem('karman_profile_completed', 'true');
-    window.location.href = 'dashboard.html';
-  } else {
-    localStorage.setItem('karman_user', JSON.stringify({ name: 'Sunita Devi', identifier: 'sunita@karman.gov.in', role: 'worker' }));
-    localStorage.setItem('karman_token', 'demo_token_sunita');
-    localStorage.setItem('karman_user_id', 'sunita@karman.gov.in');
-    localStorage.setItem('karman_profile_completed', 'true');
-    window.location.href = 'dashboard.html';
-  }
 }
