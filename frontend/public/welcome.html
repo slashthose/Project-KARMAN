@@ -12,12 +12,12 @@
 <link rel="stylesheet" href="styles.css">
 <style>
   :root {
-    --step-active: #162035;
-    --step-done: #2E6829;
+    --step-active: #14243B;
+    --step-done: #14243B;
     --step-pending: #C2BBB0;
   }
   body.welcome-body {
-    background: #FAF8F4;
+    background: #F9FAFB;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -49,9 +49,9 @@
     display: block;
   }
   .sih-badge {
-    background: #FFF3D6;
-    color: #8C651F;
-    border: 1px solid #E8D29F;
+    background: #EEF3F8;
+    color: #66707A;
+    border: 1px solid #DCE0E6;
     padding: 3px 8px;
     border-radius: 999px;
     font-size: 0.72rem;
@@ -71,7 +71,7 @@
     align-items: center;
     justify-content: space-between;
     background: #fff;
-    border: 1.5px solid var(--border-light);
+    border: 1px solid #E5E7EB;
     border-radius: 14px;
     padding: 14px 24px;
     margin-bottom: 24px;
@@ -106,7 +106,7 @@
   }
   .step-node.active .step-circle {
     background: var(--navy-dark);
-    color: #F4C542;
+    color: #14243B;
   }
   .step-node.completed .step-circle {
     background: var(--green-badge);
@@ -123,10 +123,10 @@
   }
   .welcome-card {
     background: #fff;
-    border: 1.5px solid var(--border-light);
+    border: 1px solid #E5E7EB;
     border-radius: 18px;
     padding: 36px 40px;
-    box-shadow: 0 8px 24px rgba(22, 32, 53, 0.05);
+    box-shadow: 0 1px 4px rgba(20, 36, 59, 0.05);
     animation: fadeIn 0.3s ease;
   }
   @keyframes fadeIn {
@@ -164,8 +164,8 @@
     margin-bottom: 28px;
   }
   .welcome-pill-card {
-    background: #FAF8F4;
-    border: 1.2px solid var(--border-light);
+    background: #F9FAFB;
+    border: 1px solid #E5E7EB;
     border-radius: 12px;
     padding: 16px;
   }
@@ -210,7 +210,7 @@
     background: var(--navy-dark);
   }
   .demo-login-strip {
-    background: #FAF8F4;
+    background: #F9FAFB;
     border: 1px dashed #C8BFA8;
     border-radius: 10px;
     padding: 14px 18px;
@@ -238,7 +238,7 @@
   }
   .btn-demo-quick:hover {
     border-color: var(--navy-dark);
-    background: #F4C542;
+    background: #14243B;
   }
   .profile-form-grid {
     display: grid;
@@ -265,7 +265,7 @@
     width: 100%;
     padding: 10px 14px;
     border-radius: 8px;
-    border: 1.5px solid var(--border-light);
+    border: 1px solid #E5E7EB;
     font-family: var(--font-body);
     font-size: 0.88rem;
     background: #fff;
@@ -292,8 +292,8 @@
     margin-bottom: 16px;
   }
   .diagnostic-result-strip {
-    background: #FAF8F4;
-    border: 1.5px solid var(--border-light);
+    background: #F9FAFB;
+    border: 1px solid #E5E7EB;
     border-radius: 14px;
     padding: 22px;
     margin: 24px 0 28px;
@@ -420,13 +420,13 @@
         </div>
         <div class="welcome-pill-card">
           <h4>
-            <span style="color:#8C651F;">🗺️</span> 5-Stage Career Roadmap
+            <span style="color:#66707A;">🗺️</span> 5-Stage Career Roadmap
           </h4>
           <p>Personalized milestone-by-milestone growth plan complete with recommended production-ready applied projects.</p>
         </div>
         <div class="welcome-pill-card">
           <h4>
-            <span style="color:#2E6829;">💰</span> Government Scheme Grants
+            <span style="color:#14243B;">💰</span> Government Scheme Grants
           </h4>
           <p>Direct linkage to PM-AJAY (up to ₹50,000 tool subsidy), PM-Vishwakarma, and PMKVY RPL certification.</p>
         </div>
@@ -438,7 +438,7 @@
         </div>
       </div>
 
-      <div style="background:#FAF8F4; border-radius:10px; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; font-size:.82rem; color:var(--ink-sub);">
+      <div style="background:#F9FAFB; border-radius:10px; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; font-size:.82rem; color:var(--ink-sub);">
         <span>Already have an account? Skip directly to sign-in.</span>
         <button class="btn-ghost" style="font-size:.78rem; padding:5px 12px; background:#fff; cursor:pointer;" onclick="goToStep(2, 'login')">Sign In to Existing Account →</button>
       </div>
@@ -672,7 +672,7 @@
           </div>
           <div class="diag-item">
             <div class="label">Matched Govt. Scheme</div>
-            <div class="val" id="res-grant" style="font-size:.95rem; color:#8C651F;">PM-AJAY Grant</div>
+            <div class="val" id="res-grant" style="font-size:.95rem; color:#66707A;">PM-AJAY Grant</div>
             <div class="sub" id="res-grant-sub">Eligible for Equipment &amp; Tool Support</div>
           </div>
         </div>
@@ -714,7 +714,7 @@
         const headerBtn = document.getElementById('header-workspace-btn');
         if (headerBtn) {
           headerBtn.innerText = 'Enter Workspace →';
-          headerBtn.style.background = '#2E6829';
+          headerBtn.style.background = '#14243B';
           headerBtn.style.color = '#fff';
         }
       }

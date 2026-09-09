@@ -78,7 +78,7 @@
           <div class="progress-track" style="margin-top:10px;"><span style="width:68%;" id="hero-readiness-bar"></span></div>
           <div class="stat-mini-row">
             <div class="stat-mini"><div class="num" style="color:var(--green-text);" id="hero-stat-matched">7</div><div class="lbl">Matched</div></div>
-            <div class="stat-mini"><div class="num" style="color:#8C651F;" id="hero-stat-grow">4</div><div class="lbl">To Grow</div></div>
+            <div class="stat-mini"><div class="num" style="color:#66707A;" id="hero-stat-grow">4</div><div class="lbl">To Grow</div></div>
             <div class="stat-mini"><div class="num" style="color:var(--navy-dark);" id="hero-stat-projects">3</div><div class="lbl">Projects</div></div>
           </div>
         </div>
@@ -112,7 +112,7 @@
         <p>Upload a resume or describe your background — get an ATS readiness score and exact gap map against your target role in seconds.</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon" style="background:#FFF3D6;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8C651F" stroke-width="2"><path d="M9 18h6M10 22h4M12 2a6 6 0 0 0-4 10.5c.6.5 1 1.3 1 2.1V16h6v-1.4c0-.8.4-1.6 1-2.1A6 6 0 0 0 12 2z"/></svg></div>
+        <div class="feature-icon" style="background:#EEF3F8;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#66707A" stroke-width="2"><path d="M9 18h6M10 22h4M12 2a6 6 0 0 0-4 10.5c.6.5 1 1.3 1 2.1V16h6v-1.4c0-.8.4-1.6 1-2.1A6 6 0 0 0 12 2z"/></svg></div>
         <h3>Applied Project Lab</h3>
         <p>Tailored projects designed to close the exact technical gaps identified in your resume — not generic online tutorials.</p>
       </div>
@@ -235,7 +235,7 @@
       <div style="margin-bottom:18px;">
         <label style="font-size:0.8rem; font-weight:700; color:var(--navy-dark); display:block; margin-bottom:8px;">1. SELECT YOUR BACKGROUND OR TARGET TRADE:</label>
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px;" id="wf-trade-cards">
-          <button type="button" class="wf-btn" id="wf-btn-ai_ml" onclick="selectWfTrade('ai_ml')" style="padding:12px; border-radius:12px; border:2px solid var(--navy-dark); background:#FAF8F4; text-align:left; cursor:pointer;">
+          <button type="button" class="wf-btn" id="wf-btn-ai_ml" onclick="selectWfTrade('ai_ml')" style="padding:12px; border-radius:12px; border:2px solid var(--navy-dark); background:#F9FAFB; text-align:left; cursor:pointer;">
             <div style="font-weight:700; font-size:0.88rem; color:var(--navy-dark);">AI / ML Engineer</div>
             <div style="font-size:0.72rem; color:var(--ink-sub);">College / B.Tech Track</div>
           </button>
@@ -255,7 +255,7 @@
       </div>
 
       <!-- Live Diagnosis Preview -->
-      <div style="background:#FAF8F4; border:1.5px solid var(--border-light); border-radius:16px; padding:18px; margin-bottom:20px;">
+      <div style="background:#F9FAFB; border:1.5px solid var(--border-light); border-radius:16px; padding:18px; margin-bottom:20px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
           <span style="font-size:0.82rem; font-weight:700; color:var(--navy-dark);" id="wf-diag-role">AI / ML Engineer (IT/Q0402)</span>
           <span style="font-size:1.15rem; font-weight:800; color:var(--green-text);" id="wf-diag-score">68% Readiness</span>
@@ -268,7 +268,7 @@
             <span id="wf-diag-matched" style="color:var(--ink-sub); line-height:1.4; display:block;">Python, SQL, Git, Basic Machine Learning</span>
           </div>
           <div>
-            <strong style="color:#8C651F; display:block; margin-bottom:4px;">⚙ Skill Gap to Close:</strong>
+            <strong style="color:#66707A; display:block; margin-bottom:4px;">⚙ Skill Gap to Close:</strong>
             <span id="wf-diag-gap" style="color:var(--ink-sub); line-height:1.4; display:block;">FastAPI Serving, Docker Containerization, RAG</span>
           </div>
         </div>
@@ -333,7 +333,7 @@
       const activeBtn = document.getElementById(`wf-btn-${key}`);
       if (activeBtn) {
         activeBtn.style.borderColor = 'var(--navy-dark)';
-        activeBtn.style.background = '#FAF8F4';
+        activeBtn.style.background = '#F9FAFB';
       }
 
       // Update modal diagnosis fields
