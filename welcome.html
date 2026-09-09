@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Project KARMAN — India's Next-Gen AI Career & Skill Intelligence Platform. Turn informal skills and coursework into NSQF credentials, AI roadmaps, and government grants.">
+  <link rel="icon" href="images/favicon_badge.png" type="image/png">
+  <title>Project KARMAN — Experience Liftoff with Skill Intelligence</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans (Display), Inter (Body), IBM Plex Mono (Code/Tags) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-color: #FAF9F6;
+      --card-bg: #FFFFFF;
+      --text-main: #111111;
+      --text-sub: #555555;
+      --text-muted: #888888;
+      --border-color: #E6E4DD;
+      --border-light: #F0EDE5;
+      
+      --brand-navy: #162035;
+      --brand-gold: #F4C542;
+      --brand-green: #2E6829;
+      --brand-green-bg: #EAFBF1;
+      --brand-blue: #1B4570;
+      --brand-blue-bg: #E6EEF7;
+      
+      --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+      
+      --pill-radius: 9999px;
+      --card-radius: 16px;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* TOP NAVIGATION (Antigravity Style) */
+    .nav-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(250, 249, 246, 0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(230, 228, 221, 0.6);
+      width: 100%;
+    }
+
+    .nav-container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      height: 34px;
+      width: auto;
+      display: block;
+    }
+
+    .brand-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .nav-link {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-sub);
+      transition: color 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .nav-link:hover {
+      color: var(--text-main);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-nav-ghost {
+      padding: 8px 18px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-main);
+      border-radius: var(--pill-radius);
+      transition: background 0.15s ease;
+      cursor: pointer;
+      border: 1px solid transparent;
+      background: transparent;
+    }
+
+    .btn-nav-ghost:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-nav-pill {
+      background: #111111;
+      color: #FFFFFF;
+      padding: 8px 20px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      border-radius: var(--pill-radius);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-nav-pill:hover {
+      background: #222222;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* HERO SECTION (Antigravity Style Canvas) */
+    .hero-wrapper {
+      position: relative;
+      min-height: 85vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 80px 24px 70px;
+      overflow: hidden;
+    }
+
+    /* Canvas background for subtle particle orbit field */
+    #particleCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: var(--pill-radius);
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid var(--border-color);
+      font-family: var(--font-display);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-main);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 24px;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    .hero-badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #E5484D;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2.4rem, 5.2vw, 4.2rem);
+      line-height: 1.1;
+      letter-spacing: -0.035em;
+      color: #111111;
+      margin-bottom: 24px;
+      max-width: 800px;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1rem, 1.35vw, 1.18rem);
+      font-weight: 400;
+      line-height: 1.6;
+      color: #4A4A4A;
+      max-width: 680px;
+      margin-bottom: 38px;
+    }
+
+    /* PILL BUTTON ROW (Antigravity Style) */
+    .hero-cta-group {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn-pill-dark {
+      background: #111111;
+      color: #FFFFFF;
+      padding: 14px 32px;
+      font-size: 0.98rem;
+      font-weight: 600;
+      border-radius: var(--pill-radius);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      border: 1px solid #111111;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    }
+
+    .btn-pill-dark:hover {
+      background: #262626;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-pill-light {
+      background: #FFFFFF;
+      color: #111111;
+      padding: 14px 30px;
+      font-size: 0.98rem;
+      font-weight: 600;
+      border-radius: var(--pill-radius);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-pill-light:hover {
+      background: #F4F2EB;
+      border-color: #D6D2C4;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .hero-trust-badges {
+      margin-top: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: #777777;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .hero-trust-badges span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* INLINE FAST-AUTH MODAL / CARD OVERLAY */
+    .auth-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(17, 17, 17, 0.55);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .auth-modal-overlay.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .auth-modal-card {
+      background: #FFFFFF;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      max-width: 440px;
+      position: relative;
+      padding: 36px 32px 32px;
+      animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalSlideUp {
+      from { transform: translateY(20px) scale(0.97); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      background: #F4F2EB;
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #666;
+      font-size: 1.1rem;
+      transition: background 0.15s ease;
+    }
+
+    .modal-close-btn:hover {
+      background: #E5E2D8;
+      color: #111;
+    }
+
+    .auth-tabs {
+      display: flex;
+      background: #F2EFE9;
+      padding: 4px;
+      border-radius: var(--pill-radius);
+      margin-bottom: 24px;
+    }
+
+    .auth-tab-btn {
+      flex: 1;
+      padding: 9px 0;
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-align: center;
+      border: none;
+      background: transparent;
+      color: var(--text-sub);
+      border-radius: var(--pill-radius);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .auth-tab-btn.active {
+      background: #FFFFFF;
+      color: #111111;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+      text-align: left;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-main);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      font-size: 0.92rem;
+      background: #FAF9F6;
+      color: #111;
+      font-family: inherit;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #111111;
+      background: #FFFFFF;
+      box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.08);
+    }
+
+    .form-submit-btn {
+      width: 100%;
+      padding: 13px;
+      background: #111111;
+      color: #FFFFFF;
+      border: none;
+      border-radius: var(--pill-radius);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.15s ease;
+      margin-top: 8px;
+    }
+
+    .form-submit-btn:hover {
+      background: #262626;
+      transform: translateY(-1px);
+    }
+
+    .social-divider {
+      display: flex;
+      align-items: center;
+      margin: 20px 0 16px;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .social-divider::before, .social-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--border-color);
+    }
+
+    .social-divider span {
+      padding: 0 12px;
+    }
+
+    .social-btn-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .btn-social {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      background: #FFFFFF;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .btn-social:hover {
+      background: #F7F5EE;
+      border-color: #D6D2C4;
+    }
+
+    .auth-footer-note {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 14px;
+    }
+
+    .auth-footer-note a {
+      color: var(--text-main);
+      font-weight: 600;
+      text-decoration: underline;
+    }
+
+    /* ABOUT PROJECT OVERVIEW SECTION */
+    .section-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 90px 24px;
+    }
+
+    .section-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--brand-blue);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 12px;
+      display: inline-block;
+    }
+
+    .section-headline {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.2;
+      color: var(--text-main);
+      margin-bottom: 16px;
+    }
+
+    .section-lead {
+      font-size: 1.05rem;
+      color: var(--text-sub);
+      max-width: 660px;
+      line-height: 1.6;
+      margin-bottom: 50px;
+    }
+
+    /* 4 CORE CARDS GRID */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+      margin-bottom: 70px;
+    }
+
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--card-radius);
+      padding: 30px 26px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+      border-color: #D2CDBF;
+    }
+
+    .feature-icon-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 20px;
+      background: #F4F2EB;
+    }
+
+    .feature-title {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--text-main);
+    }
+
+    .feature-desc {
+      font-size: 0.92rem;
+      color: var(--text-sub);
+      line-height: 1.55;
+    }
+
+    /* DUAL JOURNEY BANNER */
+    .journey-box {
+      background: #FFFFFF;
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 48px 40px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 70px;
+    }
+
+    @media (max-width: 860px) {
+      .journey-box {
+        grid-template-columns: 1fr;
+        padding: 30px 24px;
+        gap: 30px;
+      }
+    }
+
+    .journey-column {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .journey-tag {
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      width: fit-content;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .journey-steps {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .journey-step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 0.9rem;
+      color: var(--text-sub);
+    }
+
+    .step-number {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #111111;
+      color: #FFFFFF;
+      font-size: 0.76rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* STATS BANNER */
+    .stats-strip {
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      background: #FFFFFF;
+      padding: 40px 24px;
+      margin-bottom: 60px;
+    }
+
+    .stats-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      .stats-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+      }
+    }
+
+    .stat-number {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #111111;
+      letter-spacing: -0.03em;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      font-weight: 500;
+    }
+
+    /* FOOTER */
+    .site-footer {
+      background: #FAF9F6;
+      border-top: 1px solid var(--border-color);
+      padding: 50px 24px 40px;
+      text-align: center;
+      font-size: 0.86rem;
+      color: var(--text-sub);
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a:hover {
+      color: #111;
+      text-decoration: underline;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP NAVIGATION BAR (Antigravity Style) -->
+  <header class="nav-header">
+    <div class="nav-container">
+      <div class="brand-group">
+        <a href="welcome.html" style="display: flex; align-items: center; gap: 8px;">
+          <img src="images/karman_logo_horizontal.png" alt="Project KARMAN" class="brand-logo">
+        </a>
+      </div>
+
+      <nav class="nav-links">
+        <a href="#about-project" class="nav-link">About Project</a>
+        <a href="#core-features" class="nav-link">Features</a>
+        <a href="#dual-journeys" class="nav-link">Dual Journey</a>
+        <a href="#schemes" class="nav-link">Govt Schemes</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="btn-nav-ghost" onclick="openAuthModal('login')">Sign In</button>
+        <button class="btn-nav-pill" onclick="openAuthModal('register')">
+          <span>Get Started</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO SECTION WITH INTERACTIVE PARTICLE FIELD -->
+  <section class="hero-wrapper">
+    <!-- Subtle radiating particle field canvas -->
+    <canvas id="particleCanvas"></canvas>
+
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        <span>Built for Smart India Hackathon 2026 · AI Skill Intelligence</span>
+      </div>
+
+      <h1 class="hero-title">Experience liftoff with India's next-gen skill & career platform</h1>
+      
+      <p class="hero-subtitle">
+        Project KARMAN bridges the gap between informal work experience, coursework, and formal industry employment. We map your capabilities directly to National Skills Qualification Framework (NSQF) trades, generate AI-tailored career roadmaps, and match you with Government of India grants.
+      </p>
+
+      <div class="hero-cta-group">
+        <button class="btn-pill-dark" onclick="openAuthModal('login')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          <span>Sign In to KARMAN</span>
+        </button>
+
+        <button class="btn-pill-light" onclick="openAuthModal('register')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+          <span>Create Free Account</span>
+        </button>
+
+        <a href="#about-project" class="btn-nav-ghost" style="border: 1px solid var(--border-color); padding: 13px 24px;">
+          Explore Project Details ↓
+        </a>
+      </div>
+
+      <div class="hero-trust-badges">
+        <span>✓ 100% Free For Students & Workers</span>
+        <span>✓ NSQF Aligned (Levels 1–8)</span>
+        <span>✓ RPL Certification Verified</span>
+        <span>✓ Direct Govt Grant Matching</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS STRIP -->
+  <div class="stats-strip">
+    <div class="stats-container">
+      <div class="stat-item">
+        <div class="stat-number">450+</div>
+        <div class="stat-label">NSQF Trades & Qualification Packs</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">₹50,000</div>
+        <div class="stat-label">Average Matched Scheme Grant</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">12</div>
+        <div class="stat-label">Indian Languages (Voice & Chat)</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">100%</div>
+        <div class="stat-label">Data Privacy & Atlas Persistence</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABOUT PROJECT SECTION -->
+  <section class="section-wrap" id="about-project">
+    <span class="section-eyebrow">WHAT IS PROJECT KARMAN?</span>
+    <h2 class="section-headline">Turning Informal Skills into Certified Careers</h2>
+    <p class="section-lead">
+      More than 90% of India's workforce and millions of graduating youth hold rich, practical skills that lack formal accredited documentation. Project KARMAN solves this nationwide challenge through AI-driven competency extraction and NSQF alignment.
+    </p>
+
+    <!-- 4 CORE FEATURES GRID -->
+    <div class="feature-grid" id="core-features">
+      <div class="feature-card">
+        <div class="feature-icon-badge" style="background:#E6EEF7; color:#1B4570;">🎯</div>
+        <h3 class="feature-title">AI Skill Gap & ATS Engine</h3>
+        <p class="feature-desc">
+          Upload resumes or speak your background to calculate instant ATS readiness scores, matching percentage, and step-by-step gap closing targets.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon-badge" style="background:#EAFBF1; color:#2E6829;">🏛️</div>
+        <h3 class="feature-title">NSQF Trade Alignment</h3>
+        <p class="feature-desc">
+          Automated mapping of informal coursework and field work to official National Skills Qualification Framework occupational trades (Levels 1 to 8).
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon-badge" style="background:#FFF8E5; color:#8C651F;">🗣️</div>
+        <h3 class="feature-title">Multilingual Voice Bot</h3>
+        <p class="feature-desc">
+          Integrated with WhatsApp Voice (+1-555-203-7186) and web chat in Hindi, English, and regional languages for barrier-free accessibility.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon-badge" style="background:#F4EBF7; color:#5D2577;">💰</div>
+        <h3 class="feature-title">Govt Scheme Matcher</h3>
+        <p class="feature-desc">
+          Direct linkage with PMKVY 4.0, PM-AJAY equipment grants, and Recognition of Prior Learning (RPL) certification with tool-kit stipends.
+        </p>
+      </div>
+    </div>
+
+    <!-- DUAL JOURNEY ARCHITECTURE -->
+    <div class="journey-box" id="dual-journeys">
+      <div class="journey-column">
+        <span class="journey-tag" style="background:#E6EEF7; color:#1B4570;">For Students & Graduates</span>
+        <h3 style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 700;">Accelerate Placement Readiness</h3>
+        <p style="font-size: 0.92rem; color: var(--text-sub);">
+          Target software engineering, data science, electronics, and technical sectors with real-time portfolio scoring and resume gap resolution.
+        </p>
+        <div class="journey-steps">
+          <div class="journey-step-item">
+            <div class="step-number">1</div>
+            <span>Analyze uploaded PDF resume against top hiring benchmarks.</span>
+          </div>
+          <div class="journey-step-item">
+            <div class="step-number">2</div>
+            <span>Receive targeted 4-week project roadmaps to close missing skills.</span>
+          </div>
+          <div class="journey-step-item">
+            <div class="step-number">3</div>
+            <span>Export verified credentials and apply for campus and off-campus roles.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="journey-column" id="schemes">
+        <span class="journey-tag" style="background:#EAFBF1; color:#2E6829;">For Informal Workers</span>
+        <h3 style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 700;">Get RPL Certified & Funded</h3>
+        <p style="font-size: 0.92rem; color: var(--text-sub);">
+          Electricians, technicians, artisans, and tradespeople convert hands-on years into recognized government certificates and financial subsidies.
+        </p>
+        <div class="journey-steps">
+          <div class="journey-step-item">
+            <div class="step-number">1</div>
+            <span>Speak experience via WhatsApp voice note in native language.</span>
+          </div>
+          <div class="journey-step-item">
+            <div class="step-number">2</div>
+            <span>Instant qualification pack match & eligibility check for ₹50K grant.</span>
+          </div>
+          <div class="journey-step-item">
+            <div class="step-number">3</div>
+            <span>Direct application to PM-AJAY / PMKVY 4.0 assessment centres.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAST SIGN IN & REGISTRATION MODAL -->
+  <div class="auth-modal-overlay" id="authModal" onclick="handleBackdropClick(event)">
+    <div class="auth-modal-card">
+      <button class="modal-close-btn" onclick="closeAuthModal()" title="Close">✕</button>
+
+      <!-- Auth Tabs: Sign In vs Register -->
+      <div class="auth-tabs">
+        <button class="auth-tab-btn active" id="tabLoginBtn" onclick="switchAuthTab('login')">Sign In</button>
+        <button class="auth-tab-btn" id="tabRegisterBtn" onclick="switchAuthTab('register')">Create Account</button>
+      </div>
+
+      <!-- Social Login Buttons -->
+      <div class="social-btn-group">
+        <button class="btn-social" type="button" onclick="handleSocialAuth('google')">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.57 0 2.98.57 4.09 1.5l3.07-3.07C17.3 1.69 14.84 1 12 1 7.42 1 3.51 3.58 1.58 7.35l3.78 2.93C6.26 7.4 8.88 5 12 5z"/><path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58l3.76 2.91c2.2-2.02 3.66-5.01 3.66-8.73z"/><path fill="#FBBC05" d="M5.36 14.72A7.03 7.03 0 0 1 5 12c0-.95.16-1.87.44-2.72L1.66 6.35C.6 8.08 0 9.97 0 12c0 2.03.6 3.92 1.66 5.65l3.7-2.93z"/><path fill="#34A853" d="M12 23c3.24 0 5.95-1.08 7.93-2.91l-3.76-2.91c-1.07.72-2.45 1.16-4.17 1.16-3.12 0-5.74-2.4-6.64-5.28L1.58 15.99C3.51 19.76 7.42 23 12 23z"/></svg>
+          <span>Google</span>
+        </button>
+        <button class="btn-social" type="button" onclick="handleSocialAuth('linkedin')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#0A66C2"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.27a1.64 1.64 0 1 0 0 3.28 1.64 1.64 0 0 0 0-3.28z"/></svg>
+          <span>LinkedIn</span>
+        </button>
+      </div>
+
+      <div class="social-divider">
+        <span>or with email</span>
+      </div>
+
+      <!-- SIGN IN FORM -->
+      <form id="loginForm" onsubmit="handleInlineLogin(event)">
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-input" id="loginEmail" placeholder="you@university.edu or worker@mail.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="loginPassword" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="form-submit-btn">Sign In to Workspace →</button>
+        <div class="auth-footer-note">
+          Don't have an account? <a href="javascript:void(0)" onclick="switchAuthTab('register')">Create one now</a>
+        </div>
+      </form>
+
+      <!-- REGISTER FORM -->
+      <form id="registerForm" onsubmit="handleInlineSignup(event)" style="display: none;">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" class="form-input" id="regName" placeholder="e.g. Arjun Sharma" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-input" id="regEmail" placeholder="you@mail.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">I am a</label>
+          <select class="form-input" id="regRole" style="cursor: pointer;">
+            <option value="student">Student / Academic Learner</option>
+            <option value="worker">Informal Worker / Tradesperson</option>
+            <option value="evaluator">Evaluator / Mentor</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Create Password</label>
+          <input type="password" class="form-input" id="regPassword" placeholder="At least 6 characters" required minlength="6">
+        </div>
+        <button type="submit" class="form-submit-btn">Create Free Account →</button>
+        <div class="auth-footer-note">
+          Already registered? <a href="javascript:void(0)" onclick="switchAuthTab('login')">Sign in here</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-links">
+      <a href="index.html">Main Portal</a>
+      <a href="dashboard.html">Career Workspace</a>
+      <a href="login.html">Sign In Page</a>
+      <a href="register.html">Registration Page</a>
+      <a href="https://wa.me/15552037186?text=Namaste%20Project%20KARMAN" target="_blank">Voice Bot (+1-555-203-7186)</a>
+    </div>
+    <p>© 2026 Project KARMAN — Built for Smart India Hackathon. Aligned with NSQF & Ministry of Skill Development and Entrepreneurship.</p>
+  </footer>
+
+  <!-- AUTH SCRIPTS & RADIAL PARTICLE CANVAS -->
+  <script src="auth.js"></script>
+  <script>
+    // Particle Canvas Animation (Google Antigravity Style Radial Orbit Field)
+    (function initAntigravityParticles() {
+      const canvas = document.getElementById('particleCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let particles = [];
+      let width, height, cx, cy;
+
+      function resize() {
+        width = canvas.width = canvas.parentElement.offsetWidth;
+        height = canvas.height = canvas.parentElement.offsetHeight;
+        cx = width / 2;
+        cy = height / 2;
+        createParticles();
+      }
+
+      const colors = ['#162035', '#E5484D', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#475569'];
+
+      function createParticles() {
+        particles = [];
+        const count = Math.min(Math.floor(width * 0.18), 180);
+        for (let i = 0; i < count; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const dist = 60 + Math.random() * (Math.max(width, height) * 0.65);
+          particles.push({
+            angle: angle,
+            dist: dist,
+            speed: (0.0003 + Math.random() * 0.0006) * (Math.random() > 0.5 ? 1 : -1),
+            size: Math.random() * 2.2 + 1,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            alpha: Math.random() * 0.5 + 0.25,
+            orbitEccentricity: 0.7 + Math.random() * 0.3
+          });
+        }
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, width, height);
+
+        particles.forEach(p => {
+          p.angle += p.speed;
+          // Elliptical coordinate radiating outward
+          const x = cx + Math.cos(p.angle) * p.dist;
+          const y = cy + Math.sin(p.angle) * (p.dist * p.orbitEccentricity);
+
+          ctx.beginPath();
+          ctx.arc(x, y, p.size, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = p.alpha;
+          ctx.fill();
+        });
+
+        ctx.globalAlpha = 1;
+        requestAnimationFrame(draw);
+      }
+
+      window.addEventListener('resize', resize);
+      resize();
+      draw();
+    })();
+
+    // Modal Control Functions
+    function openAuthModal(mode) {
+      const modal = document.getElementById('authModal');
+      if (!modal) return;
+      switchAuthTab(mode || 'login');
+      modal.classList.add('active');
+    }
+
+    function closeAuthModal() {
+      const modal = document.getElementById('authModal');
+      if (modal) modal.classList.remove('active');
+    }
+
+    function handleBackdropClick(e) {
+      if (e.target.id === 'authModal') {
+        closeAuthModal();
+      }
+    }
+
+    function switchAuthTab(tab) {
+      const tabLoginBtn = document.getElementById('tabLoginBtn');
+      const tabRegBtn = document.getElementById('tabRegisterBtn');
+      const loginForm = document.getElementById('loginForm');
+      const regForm = document.getElementById('registerForm');
+
+      if (tab === 'login') {
+        tabLoginBtn.classList.add('active');
+        tabRegBtn.classList.remove('active');
+        loginForm.style.display = 'block';
+        regForm.style.display = 'none';
+      } else {
+        tabRegBtn.classList.add('active');
+        tabLoginBtn.classList.remove('active');
+        loginForm.style.display = 'none';
+        regForm.style.display = 'block';
+      }
+    }
+
+    // Direct Form Handlers
+    function handleInlineLogin(event) {
+      event.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      if (!email || !password) return;
+
+      const user = {
+        name: email.split('@')[0],
+        email: email,
+        role: "student",
+        id: "usr_" + Math.random().toString(36).substr(2, 9),
+        loginTime: new Date().toISOString()
+      };
+
+      localStorage.setItem("karman_user", JSON.stringify(user));
+      localStorage.setItem("karman_token", "jwt_" + btoa(email));
+      localStorage.setItem("karman_is_logged_in", "true");
+
+      window.location.href = "dashboard.html";
+    }
+
+    function handleInlineSignup(event) {
+      event.preventDefault();
+      const name = document.getElementById('regName').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const role = document.getElementById('regRole').value;
+      const password = document.getElementById('regPassword').value;
+
+      if (!name || !email || !password) return;
+
+      const user = {
+        name: name,
+        email: email,
+        role: role,
+        id: "usr_" + Math.random().toString(36).substr(2, 9),
+        signupTime: new Date().toISOString()
+      };
+
+      localStorage.setItem("karman_user", JSON.stringify(user));
+      localStorage.setItem("karman_token", "jwt_" + btoa(email));
+      localStorage.setItem("karman_is_logged_in", "true");
+
+      window.location.href = "dashboard.html";
+    }
+
+    function handleSocialAuth(provider) {
+      const dummyUser = {
+        name: provider === "google" ? "Google Explorer" : "LinkedIn Professional",
+        email: provider + "_user@karman.gov.in",
+        role: "student",
+        provider: provider,
+        id: "usr_" + Math.random().toString(36).substr(2, 9),
+        loginTime: new Date().toISOString()
+      };
+      localStorage.setItem("karman_user", JSON.stringify(dummyUser));
+      localStorage.setItem("karman_token", "jwt_" + btoa(provider));
+      localStorage.setItem("karman_is_logged_in", "true");
+      window.location.href = "dashboard.html";
+    }
+  </script>
+</body>
+</html>
