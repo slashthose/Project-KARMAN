@@ -223,7 +223,7 @@ body.dashboard-page {
 .sidebar-logo-full {
   height: 28px;
   width: auto;
-  max-width: 140px;
+  max-width: 155px;
   object-fit: contain;
   display: block;
 }
