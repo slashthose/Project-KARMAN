@@ -141,7 +141,9 @@ def generate_applicant_pdf(applicant_data: dict) -> str:
         'WebBadgeTxt', parent=body_style, fontName='Helvetica-Bold', fontSize=7.5, leading=9.5, textColor=colors.white, alignment=TA_CENTER
     )
 
-    logo_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "images", "karman_logo_horizontal.png")
+    logo_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "images", "karman_pdf_logo.png")
+    if not os.path.exists(logo_path):
+        logo_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "images", "karman_logo_horizontal_light.png")
     if not os.path.exists(logo_path):
         logo_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "images", "karman_logo_clean.png")
 
@@ -159,7 +161,7 @@ def generate_applicant_pdf(applicant_data: dict) -> str:
         right_cells = []
         if os.path.exists(logo_path):
             try:
-                img = Image(logo_path, width=130, height=32)
+                img = Image(logo_path, width=130, height=28)
                 right_cells.append(img)
             except Exception:
                 right_cells.append(Paragraph(f"<b>PROJECT KARMAN</b>", ParagraphStyle('BLogo', parent=banner_title_style, alignment=TA_RIGHT)))
