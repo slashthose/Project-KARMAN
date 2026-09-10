@@ -371,28 +371,6 @@
           <img src="images/cat_bot.jpg" alt="Bot Mascot" style="width:90px; height:90px; object-fit:cover; border-radius:50%; border:2px solid var(--navy-dark);">
         </div>
 
-        <!-- Channel Switcher & External Direct Launch Links -->
-        <div class="channel-switcher">
-          <button class="channel-tab active whatsapp" id="tab-channel-wa" onclick="switchBotChannel('whatsapp')">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.966.527 1.777.813 2.796.813 3.182 0 5.767-2.586 5.768-5.766 0-3.18-2.586-5.768-5.768-5.768z"/></svg>
-            <span>WhatsApp Bot (+1-555-203-7186)</span>
-          </button>
-          
-          <button class="channel-tab telegram" id="tab-channel-tg" onclick="switchBotChannel('telegram')">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
-            <span>Telegram Bot (@projectkarmancareerguidancebot)</span>
-          </button>
-
-          <div style="margin-left:auto; display:flex; gap:8px;">
-            <a href="https://wa.me/15552037186?text=Namaste%20Project%20KARMAN" target="_blank" class="btn-whatsapp-pill" title="Open official WhatsApp Bot (+1-555-203-7186)">
-              <span>Open in WhatsApp ↗</span>
-            </a>
-            <a href="https://t.me/projectkarmancareerguidancebot" target="_blank" class="btn-telegram-pill" title="Open official Telegram Bot (@projectkarmancareerguidancebot)">
-              <span>Open in Telegram ↗</span>
-            </a>
-          </div>
-        </div>
-
         <div class="tg-shell" id="bot-shell">
           <div class="tg-header" id="bot-shell-header">
             <div class="tg-header-left">
@@ -433,12 +411,6 @@
             <button onclick="tgReply(this)">Start RPL technician certification</button>
             <button onclick="tgReply(this)">Find district skill assessment camp</button>
           </div>
-        </div>
-
-        <div class="tg-stat-row">
-          <div class="stat-mini"><div class="num" style="color:var(--blue-text);">312</div><div class="lbl">Active Conversations</div></div>
-          <div class="stat-mini"><div class="num" style="color:var(--green-text);">89%</div><div class="lbl">Resolved Without Human</div></div>
-          <div class="stat-mini"><div class="num" style="color:var(--navy-dark);">2.4s</div><div class="lbl">AI Response Time</div></div>
         </div>
       </div>
 
