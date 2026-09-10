@@ -237,20 +237,35 @@ const KarmanAPI = {
     if (remote) return remote;
 
     const isMechanic = query.toLowerCase().includes("mechanic") || query.toLowerCase().includes("two-wheeler") || query.toLowerCase().includes("bike");
+    const isSolar = query.toLowerCase().includes("solar") || query.toLowerCase().includes("panel") || query.toLowerCase().includes("electric");
+    const isHindi = Boolean(query.match(/[\u0900-\u097F]/) || query.toLowerCase().match(/\b(mujhe|mera|meri|hai|karna|chahiye|kaam|silai|gaadi|bijli|paisa|loan)\b/));
+
+    const trade = isSolar ? "Solar PV & Electrical Installation" : (isMechanic ? "Two & Three Wheeler Service Technician" : "Tailoring & Garment Sewing");
+    const qpCode = isSolar ? "SGJ/Q0101" : (isMechanic ? "ASC/Q1401" : "AMH/Q0301");
+    const grant = isSolar ? "₹45,000 (PM-Surya Ghar)" : (isMechanic ? "₹35,000 (PM-AJAY Tool Kit Grant)" : "₹50,000 (PM-AJAY Capital Equipment Grant)");
+
+    let replyMsg = "";
+    if (isHindi) {
+      replyMsg = `नमस्ते! KARMAN AI ने आपके हुनर को **NSQF Level 4 (${qpCode})** के तहत पहचाना है। आप सीधे 3-दिवसीय RPL प्रमाणन और ${grant} सहायता के पात्र हैं!`;
+    } else {
+      replyMsg = `Greetings! KARMAN AI identified your skill as **${trade} (NSQF Level 4 - ${qpCode})**. You qualify for fast-track RPL certification and ${grant}!`;
+    }
+
     return {
       status: "success",
-      extracted_skill: isMechanic ? "Two & Three Wheeler Service Technician" : "Tailoring & Garment Sewing",
+      extracted_skill: trade,
+      detected_language: isHindi ? "hi" : "en",
+      reply_message: replyMsg,
       nsqf_mapping: {
-        trade: isMechanic ? "Automotive Technician" : "Apparel & Garment Making",
+        trade: trade,
         level: "NSQF Level 4",
-        qp_code: isMechanic ? "ASC/Q1401" : "AMH/Q0301"
+        qp_code: qpCode
       },
       pm_ajay_eligibility: {
         status: "Eligible for Micro-Enterprise Subsidy",
-        grant_type: isMechanic ? "PM-Vishwakarma Toolkit Grant" : "PM-AJAY Capital Equipment Grant",
-        subsidy_amount: isMechanic ? "₹35,000 Assistance" : "₹50,000 Assistance"
+        grant_type: isSolar ? "PM-Surya Ghar Equipment Subsidy" : (isMechanic ? "PM-Vishwakarma Toolkit Grant" : "PM-AJAY Capital Equipment Grant"),
+        subsidy_amount: grant
       },
-      reply_message: `Namaste! KARMAN AI identified your skill as ${isMechanic ? "Two-Wheeler Technician" : "Tailoring"} (NSQF Level 4). You qualify for fast-track RPL certification and government grant assistance!`,
       generated_pdf_url: "#"
     };
   },

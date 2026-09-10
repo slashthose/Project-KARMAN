@@ -1,4 +1,5 @@
 import os
+import hashlib
 from datetime import datetime
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
@@ -80,7 +81,9 @@ def generate_applicant_pdf(applicant_data: dict) -> str:
     - Border Light: #E2DCD0
     """
     applicant_id = applicant_data.get("applicant_id", "919876543210")
-    pdf_filename = f"Roadmap_{applicant_id}.pdf"
+    raw_query = applicant_data.get("original_audio_intent") or applicant_data.get("translated_text") or applicant_data.get("extracted_skill", "vocational")
+    query_hash = hashlib.md5(f"{applicant_id}_{raw_query}".encode('utf-8')).hexdigest()[:8]
+    pdf_filename = f"Roadmap_{applicant_id}_{query_hash}.pdf"
     file_path = os.path.join(STATIC_DIR, pdf_filename)
 
     doc = SimpleDocTemplate(
@@ -250,7 +253,35 @@ def generate_applicant_pdf(applicant_data: dict) -> str:
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
     ]))
     elements.append(t_goal)
-    elements.append(Spacer(1, 12))
+    elements.append(Spacer(1, 10))
+
+    # Dynamic Competency & Skill Gap Breakdown (derived from user's exact query)
+    verified_comps = applicant_data.get("verified_competencies", [f"Practical domain expertise in {current_skills}", "Tool handling and operation", "Execution of customer trade work"])
+    gaps = applicant_data.get("skill_gaps", [f"Advanced commercial {current_skills} upskilling", "Digital marketplace & DigiLocker certification"])
+    
+    comp_cells = [
+        Paragraph("<b>✓ IDENTIFIED TRADE COMPETENCIES (From Experience)</b>", ParagraphStyle('ch1', parent=body_bold, textColor=GREEN_TEXT, fontSize=8)),
+    ]
+    for c in verified_comps:
+        comp_cells.append(Paragraph(f"<font color='{GREEN_TEXT.hexval()}'>✔</font> {c}", ParagraphStyle('cc1', parent=body_style, fontSize=7.5, leading=10.5)))
+    
+    gap_cells = [
+        Paragraph("<b>⚡ BRIDGING GAPS FOR FULL NSQF PASS</b>", ParagraphStyle('ch2', parent=body_bold, textColor=AMBER_TEXT, fontSize=8)),
+    ]
+    for g in gaps:
+        gap_cells.append(Paragraph(f"<font color='{AMBER_TEXT.hexval()}'>✦</font> {g}", ParagraphStyle('cg1', parent=body_style, fontSize=7.5, leading=10.5)))
+
+    t_eval = Table([[comp_cells, gap_cells]], colWidths=[270, 270])
+    t_eval.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (0, 0), GREEN_BADGE),
+        ('BACKGROUND', (1, 0), (1, 0), AMBER_BG),
+        ('BOX', (0, 0), (-1, -1), 1, BORDER_LIGHT),
+        ('INNERGRID', (0, 0), (-1, -1), 0.5, BORDER_LIGHT),
+        ('PADDING', (0, 0), (-1, -1), 6),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+    ]))
+    elements.append(t_eval)
+    elements.append(Spacer(1, 10))
 
     elements.append(Paragraph("🎯 YOUR RECOMMENDED PROGRESSION PATHWAY", page_header_style))
     elements.append(HRFlowable(width="100%", thickness=1.5, color=GOLD_HERO, spaceAfter=8))

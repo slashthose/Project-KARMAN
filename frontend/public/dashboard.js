@@ -452,6 +452,30 @@ function tgReply(btn) {
 
 let recognitionInstance = null;
 let isRecordingVoice = false;
+let selectedVoiceLang = 'hi-IN'; // Default to Hindi / Hinglish
+
+function setVoiceLanguage(langCode) {
+  selectedVoiceLang = langCode;
+  const hiBtn = document.getElementById('lang-btn-hi');
+  const enBtn = document.getElementById('lang-btn-en');
+  const input = document.getElementById('tg-user-input');
+
+  if (langCode === 'hi-IN') {
+    if (hiBtn) { hiBtn.style.background = '#162035'; hiBtn.style.color = '#fff'; }
+    if (enBtn) { enBtn.style.background = 'transparent'; enBtn.style.color = '#5C564A'; }
+    if (input) input.placeholder = "Type or speak in Hindi / Hinglish (e.g., 'Mujhe silai aati hai, machine grant chahiye')…";
+  } else {
+    if (enBtn) { enBtn.style.background = '#162035'; enBtn.style.color = '#fff'; }
+    if (hiBtn) { hiBtn.style.background = 'transparent'; hiBtn.style.color = '#5C564A'; }
+    if (input) input.placeholder = "Type or speak in English (e.g., 'I am a solar technician looking for RPL certification')…";
+  }
+
+  // If currently recording, restart with new language
+  if (isRecordingVoice && recognitionInstance) {
+    recognitionInstance.stop();
+    setTimeout(() => toggleVoiceInput(), 300);
+  }
+}
 
 function toggleVoiceInput() {
   const micBtn = document.getElementById('tg-mic-btn');
@@ -459,7 +483,7 @@ function toggleVoiceInput() {
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
-    alert("Voice input is supported in Google Chrome, Edge, and modern browsers via Web Speech API.");
+    alert("Voice input is supported in Google Chrome, Microsoft Edge, and modern browsers via Web Speech API.");
     return;
   }
 
@@ -470,7 +494,7 @@ function toggleVoiceInput() {
 
   try {
     recognitionInstance = new SpeechRecognition();
-    recognitionInstance.lang = 'hi-IN'; // Default to Hindi, can detect mixed Indian English
+    recognitionInstance.lang = selectedVoiceLang; // Dynamic: 'hi-IN' (Hindi/Hinglish) or 'en-IN' (English)
     recognitionInstance.interimResults = true;
     recognitionInstance.maxAlternatives = 1;
 
@@ -481,7 +505,11 @@ function toggleVoiceInput() {
         micBtn.style.borderColor = '#FF4D4D';
         micBtn.style.color = '#D90000';
       }
-      if (input) input.placeholder = "Listening... बोलिए (Recording voice)...";
+      if (input) {
+        input.placeholder = selectedVoiceLang === 'hi-IN' 
+          ? "Listening... बोलिए (Recording Hindi / Hinglish)..." 
+          : "Listening... Please speak (Recording English)...";
+      }
     };
 
     recognitionInstance.onresult = (event) => {
@@ -493,7 +521,7 @@ function toggleVoiceInput() {
     };
 
     recognitionInstance.onerror = (event) => {
-      console.warn("Speech recognition warning:", event.error);
+      console.warn("Speech recognition notice:", event.error);
     };
 
     recognitionInstance.onend = () => {
@@ -504,7 +532,9 @@ function toggleVoiceInput() {
         micBtn.style.color = '';
       }
       if (input) {
-        input.placeholder = "Type or speak your skill (e.g., 'Mujhe silai aati hai, machine grant chahiye')…";
+        input.placeholder = selectedVoiceLang === 'hi-IN'
+          ? "Type or speak in Hindi / Hinglish (e.g., 'Mujhe silai aati hai, machine grant chahiye')…"
+          : "Type or speak in English (e.g., 'I am a solar technician looking for RPL certification')…";
         if (input.value.trim()) {
           sendTgUserMessage(input.value.trim());
           input.value = '';

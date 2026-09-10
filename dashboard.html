@@ -415,7 +415,14 @@
 
           <div class="tg-input-bar">
             <input id="tg-user-input" placeholder="Type or speak your skill (e.g., 'Mujhe silai aati hai, machine grant chahiye')…" onkeypress="handleTgInputKey(event)">
-            <button id="tg-mic-btn" type="button" class="btn-ghost" onclick="toggleVoiceInput()" title="Voice Recording Input (Hindi / English)" style="padding:8px 12px; display:inline-flex; align-items:center; justify-content:center; border-radius:8px; border:1px solid var(--border-light);">
+            
+            <!-- Language Selector for Voice Assistant -->
+            <div id="tg-lang-toggle" style="display:inline-flex; background:#EAE6DF; border-radius:8px; padding:2px; font-size:.74rem; font-weight:700; border:1px solid var(--border-light); margin-right:4px;">
+              <button id="lang-btn-hi" type="button" onclick="setVoiceLanguage('hi-IN')" style="border:none; background:#162035; color:#fff; padding:4px 8px; border-radius:6px; cursor:pointer;" title="हिंदी / Hinglish Voice Input">🇮🇳 HI</button>
+              <button id="lang-btn-en" type="button" onclick="setVoiceLanguage('en-IN')" style="border:none; background:transparent; color:#5C564A; padding:4px 8px; border-radius:6px; cursor:pointer;" title="English Voice Input">🇬🇧 EN</button>
+            </div>
+
+            <button id="tg-mic-btn" type="button" class="btn-ghost" onclick="toggleVoiceInput()" title="Voice Recording Input (Auto Detect Hindi/English)" style="padding:8px 12px; display:inline-flex; align-items:center; justify-content:center; border-radius:8px; border:1px solid var(--border-light);">
               <svg id="tg-mic-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
             </button>
             <button class="btn-navy-pill" onclick="const input = document.getElementById('tg-user-input'); if (input.value.trim()) { sendTgUserMessage(input.value.trim()); input.value = ''; }">Send</button>
