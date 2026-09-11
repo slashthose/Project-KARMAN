@@ -5,6 +5,14 @@ function setLoginRole(role) {
   currentLoginRole = role;
   const tabStudent = document.getElementById('tab-btn-student');
   const tabWorker = document.getElementById('tab-btn-worker');
+  const tabArtisan = document.getElementById('tab-btn-artisan');
+  const tabEntrepreneur = document.getElementById('tab-btn-entrepreneur');
+
+  if (tabStudent) tabStudent.classList.toggle('active', role === 'student');
+  if (tabWorker) tabWorker.classList.toggle('active', role === 'worker');
+  if (tabArtisan) tabArtisan.classList.toggle('active', role === 'artisan');
+  if (tabEntrepreneur) tabEntrepreneur.classList.toggle('active', role === 'entrepreneur');
+
   const title = document.getElementById('login-title');
   const subtitle = document.getElementById('login-subtitle');
   const socialBlock = document.getElementById('student-social-block');
@@ -16,28 +24,7 @@ function setLoginRole(role) {
   const btnOtp = document.getElementById('btn-request-otp');
   const btnSubmit = document.getElementById('btn-login-submit');
 
-  if (role === 'worker') {
-    if (tabWorker) tabWorker.classList.add('active');
-    if (tabStudent) tabStudent.classList.remove('active');
-    if (title) title.innerText = "Log into your account";
-    if (subtitle) subtitle.innerText = "Access your livelihood skill mapping, RPL certificate & schemes";
-    if (socialBlock) socialBlock.style.display = 'none';
-    if (workerQuickBlock) workerQuickBlock.style.display = 'block';
-    if (lblIdentifier) lblIdentifier.innerText = "Registered Mobile Number (मोबाइल नंबर)";
-    if (inputEmail) {
-      inputEmail.placeholder = "e.g. 919876543210";
-      inputEmail.value = "919876543210";
-    }
-    if (lblPass) lblPass.innerText = "SMS OTP / Password (ओटीपी)";
-    if (inputPass) {
-      inputPass.placeholder = "Enter 4-digit OTP or password";
-      inputPass.value = "1234";
-    }
-    if (btnOtp) btnOtp.style.display = 'inline-block';
-    if (btnSubmit) btnSubmit.innerText = "Continue →";
-  } else {
-    if (tabStudent) tabStudent.classList.add('active');
-    if (tabWorker) tabWorker.classList.remove('active');
+  if (role === 'student') {
     if (title) title.innerText = "Log into your account";
     if (subtitle) subtitle.innerText = "Access your career workspace, schemes & skills";
     if (socialBlock) socialBlock.style.display = 'block';
@@ -53,7 +40,59 @@ function setLoginRole(role) {
       inputPass.value = "password123";
     }
     if (btnOtp) btnOtp.style.display = 'none';
-    if (btnSubmit) btnSubmit.innerText = "Continue →";
+    if (btnSubmit) btnSubmit.innerText = "Continue to Student Workspace →";
+  } else if (role === 'artisan') {
+    if (title) title.innerText = "Artisan & Craftsman Login (कारीगर लॉगिन)";
+    if (subtitle) subtitle.innerText = "Access craft RPL certification, PM Vishwakarma & toolkit linkages";
+    if (socialBlock) socialBlock.style.display = 'none';
+    if (workerQuickBlock) workerQuickBlock.style.display = 'block';
+    if (lblIdentifier) lblIdentifier.innerText = "Artisan Mobile / ID (कारीगर मोबाइल)";
+    if (inputEmail) {
+      inputEmail.placeholder = "e.g. 919876543222";
+      inputEmail.value = "919876543222";
+    }
+    if (lblPass) lblPass.innerText = "SMS OTP / Password (ओटीपी)";
+    if (inputPass) {
+      inputPass.placeholder = "Enter 4-digit OTP or password";
+      inputPass.value = "1234";
+    }
+    if (btnOtp) btnOtp.style.display = 'inline-block';
+    if (btnSubmit) btnSubmit.innerText = "Continue to Artisan Portal →";
+  } else if (role === 'entrepreneur') {
+    if (title) title.innerText = "Micro-Enterprise Login (उद्यम लॉगिन)";
+    if (subtitle) subtitle.innerText = "Access enterprise plans, capital subsidies & equipment checklists";
+    if (socialBlock) socialBlock.style.display = 'none';
+    if (workerQuickBlock) workerQuickBlock.style.display = 'block';
+    if (lblIdentifier) lblIdentifier.innerText = "Udyam Mobile / Reg No (मोबाइल नंबर)";
+    if (inputEmail) {
+      inputEmail.placeholder = "e.g. 919876543333";
+      inputEmail.value = "919876543333";
+    }
+    if (lblPass) lblPass.innerText = "SMS OTP / Password (ओटीपी)";
+    if (inputPass) {
+      inputPass.placeholder = "Enter 4-digit OTP or password";
+      inputPass.value = "1234";
+    }
+    if (btnOtp) btnOtp.style.display = 'inline-block';
+    if (btnSubmit) btnSubmit.innerText = "Continue to Enterprise Portal →";
+  } else {
+    // worker
+    if (title) title.innerText = "Worker Login (श्रमिक / कामगार)";
+    if (subtitle) subtitle.innerText = "Access your livelihood skill mapping, RPL certificate & schemes";
+    if (socialBlock) socialBlock.style.display = 'none';
+    if (workerQuickBlock) workerQuickBlock.style.display = 'block';
+    if (lblIdentifier) lblIdentifier.innerText = "Registered Mobile Number (मोबाइल नंबर)";
+    if (inputEmail) {
+      inputEmail.placeholder = "e.g. 919876543210";
+      inputEmail.value = "919876543210";
+    }
+    if (lblPass) lblPass.innerText = "SMS OTP / Password (ओटीपी)";
+    if (inputPass) {
+      inputPass.placeholder = "Enter 4-digit OTP or password";
+      inputPass.value = "1234";
+    }
+    if (btnOtp) btnOtp.style.display = 'inline-block';
+    if (btnSubmit) btnSubmit.innerText = "Continue to Worker Portal →";
   }
 }
 
@@ -73,6 +112,16 @@ function handleSocialLogin(role) {
     localStorage.setItem('karman_user_id', 'sunita@karman.gov.in');
     localStorage.setItem('karman_role', 'worker');
     localStorage.setItem('karman_token', 'token_worker_' + Date.now());
+  } else if (role === 'artisan') {
+    localStorage.setItem('karman_user', JSON.stringify({ name: 'Rameshwar Sharma', identifier: '919876543222', role: 'artisan', trade: 'Heritage Handloom & Carpentry' }));
+    localStorage.setItem('karman_user_id', 'rameshwar@karman.gov.in');
+    localStorage.setItem('karman_role', 'artisan');
+    localStorage.setItem('karman_token', 'token_artisan_' + Date.now());
+  } else if (role === 'entrepreneur') {
+    localStorage.setItem('karman_user', JSON.stringify({ name: 'Vikram Patel', identifier: '919876543333', role: 'entrepreneur', trade: 'Two Wheeler Service Micro-Enterprise' }));
+    localStorage.setItem('karman_user_id', 'vikram@karman.gov.in');
+    localStorage.setItem('karman_role', 'entrepreneur');
+    localStorage.setItem('karman_token', 'token_entrepreneur_' + Date.now());
   } else {
     localStorage.setItem('karman_user', JSON.stringify({ name: 'Arjun Mehta', identifier: 'arjun@karman.gov.in', role: 'student', trade: 'AI / ML Engineer' }));
     localStorage.setItem('karman_user_id', 'arjun@karman.gov.in');
@@ -85,9 +134,13 @@ function handleSocialLogin(role) {
 // Check URL param on page load (e.g. login.html?role=worker)
 document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
-  const roleParam = urlParams.get('role');
-  if (roleParam === 'worker' || roleParam === 'artisan' || roleParam === 'beneficiary') {
+  const roleParam = (urlParams.get('role') || '').toLowerCase();
+  if (roleParam === 'worker') {
     setLoginRole('worker');
+  } else if (roleParam === 'artisan') {
+    setLoginRole('artisan');
+  } else if (roleParam === 'entrepreneur' || roleParam === 'business') {
+    setLoginRole('entrepreneur');
   } else {
     setLoginRole('student');
   }
@@ -119,8 +172,22 @@ async function handleLogin(e) {
   } catch (err) {
     console.error(err);
     // Fallback login
-    const defaultName = currentLoginRole === 'worker' ? 'Sunita Devi' : (identifier.includes('@') ? identifier.split('@')[0] : identifier);
-    const defaultTrade = currentLoginRole === 'worker' ? 'Tailoring & Sewing' : 'AI / ML Engineer';
+    let defaultName = 'Arjun Mehta';
+    let defaultTrade = 'AI / ML Engineer';
+    if (currentLoginRole === 'worker') {
+      defaultName = 'Sunita Devi';
+      defaultTrade = 'Tailoring & Sewing';
+    } else if (currentLoginRole === 'artisan') {
+      defaultName = 'Rameshwar Sharma';
+      defaultTrade = 'Heritage Handloom & Carpentry';
+    } else if (currentLoginRole === 'entrepreneur') {
+      defaultName = 'Vikram Patel';
+      defaultTrade = 'Two Wheeler Service Micro-Enterprise';
+    } else if (identifier.includes('@')) {
+      defaultName = identifier.split('@')[0];
+    } else {
+      defaultName = identifier;
+    }
     localStorage.setItem('karman_user', JSON.stringify({ name: defaultName, identifier, role: currentLoginRole, trade: defaultTrade }));
     localStorage.setItem('karman_token', 'token_' + Date.now());
     localStorage.setItem('karman_user_id', identifier);
@@ -129,7 +196,7 @@ async function handleLogin(e) {
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.innerText = currentLoginRole === 'worker' ? "Continue to Beneficiary Portal →" : "Continue to Student Workspace →";
+      submitBtn.innerText = currentLoginRole === 'student' ? "Continue to Student Workspace →" : "Continue to Portal →";
     }
   }
   return false;

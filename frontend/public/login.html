@@ -35,14 +35,22 @@
         </div>
 
         <!-- ROLE SEPARATOR TABS -->
-        <div class="auth-role-tabs">
-          <button type="button" class="auth-role-tab active" id="tab-btn-student" onclick="setLoginRole('student')">
-            <span class="tab-icon">🎓</span>
-            <span class="tab-label">Student / Youth</span>
+        <div class="auth-role-tabs" style="grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 3px;">
+          <button type="button" class="auth-role-tab active" id="tab-btn-student" onclick="setLoginRole('student')" style="padding: 8px 4px; font-size: 0.74rem;">
+            <span class="tab-icon" style="font-size:0.95rem;">🎓</span>
+            <span class="tab-label">Student</span>
           </button>
-          <button type="button" class="auth-role-tab" id="tab-btn-worker" onclick="setLoginRole('worker')">
-            <span class="tab-icon">🛠️</span>
-            <span class="tab-label">Worker / Artisan</span>
+          <button type="button" class="auth-role-tab" id="tab-btn-worker" onclick="setLoginRole('worker')" style="padding: 8px 4px; font-size: 0.74rem;">
+            <span class="tab-icon" style="font-size:0.95rem;">🛠️</span>
+            <span class="tab-label">Worker</span>
+          </button>
+          <button type="button" class="auth-role-tab" id="tab-btn-artisan" onclick="setLoginRole('artisan')" style="padding: 8px 4px; font-size: 0.74rem;">
+            <span class="tab-icon" style="font-size:0.95rem;">🧵</span>
+            <span class="tab-label">Artisan</span>
+          </button>
+          <button type="button" class="auth-role-tab" id="tab-btn-entrepreneur" onclick="setLoginRole('entrepreneur')" style="padding: 8px 4px; font-size: 0.74rem;">
+            <span class="tab-icon" style="font-size:0.95rem;">🏪</span>
+            <span class="tab-label">Business</span>
           </button>
         </div>
 
