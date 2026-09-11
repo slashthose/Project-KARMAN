@@ -2,10 +2,12 @@
 <html lang="en">
 <head>
 <script>
-  // Automatic portal router: redirect worker/artisan/business to beneficiary dashboard
+  // Automatic portal router: redirect worker/artisan/business to beneficiary dashboard, student to student dashboard
   const userRole = (localStorage.getItem('karman_role') || 'student').toLowerCase();
   if (userRole === 'worker' || userRole === 'artisan' || userRole === 'entrepreneur' || userRole === 'business') {
     window.location.replace('beneficiary-dashboard.html');
+  } else {
+    window.location.replace('student-dashboard.html');
   }
 </script>
 <meta charset="UTF-8">

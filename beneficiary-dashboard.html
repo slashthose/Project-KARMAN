@@ -3,14 +3,159 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="KARMAN Career Workspace — skill mapping, readiness scoring and roadmap dashboard.">
+<meta name="description" content="KARMAN Beneficiary Workspace — Livelihood trade identification, NSQF mapping, RPL certification and PM-AJAY capital grants.">
 <link rel="icon" href="images/favicon_badge.png" type="image/png">
 <title>Beneficiary Livelihood Workspace — KARMAN</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<style>
+/* Additional component styling adhering strictly to KARMAN design tokens */
+.nsqf-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #FFFFFF;
+  border: 1.5px solid var(--border-light);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--navy-dark);
+  cursor: pointer;
+  transition: all .15s ease;
+  white-space: nowrap;
+}
+.nsqf-chip:hover {
+  border-color: var(--navy-dark);
+  background: #FAF8F4;
+  transform: translateY(-1px);
+}
+.nsqf-chip.active {
+  background: var(--navy-dark);
+  color: #FFFFFF;
+  border-color: var(--navy-dark);
+}
 
+.calc-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: #E2E8F0;
+  outline: none;
+  margin: 12px 0;
+}
+.calc-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--yellow-hero);
+  border: 2.5px solid var(--navy-dark);
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  transition: transform .1s;
+}
+.calc-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+.dossier-card {
+  background: #FFFFFF;
+  border: 1.5px solid var(--border-light);
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all .18s ease;
+}
+.dossier-card:hover {
+  border-color: var(--navy-dark);
+  box-shadow: 0 3px 10px rgba(22,32,53,0.06);
+}
+
+.dossier-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+.dossier-status-pill.verified {
+  background: #DCFCE7;
+  color: #15803D;
+  border: 1px solid #BBF7D0;
+}
+.dossier-status-pill.pending {
+  background: #FEF3C7;
+  color: #92400E;
+  border: 1px solid #FDE68A;
+}
+
+/* Modal backdrop & card */
+.k-modal-backdrop {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(22, 32, 53, 0.72);
+  backdrop-filter: blur(3px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+.k-modal-backdrop.active {
+  display: flex;
+}
+.k-modal-dialog {
+  background: #FFFFFF;
+  border: 2px solid var(--navy-dark);
+  border-radius: 16px;
+  max-width: 680px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 28px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  position: relative;
+}
+.k-modal-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: #F1F5F9;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--navy-dark);
+}
+.action-card-mono {
+  font-family: 'IBM Plex Mono', monospace;
+  background: #162035;
+  color: #E2E8F0;
+  padding: 20px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-x: auto;
+  border: 1px solid #3A4763;
+}
+</style>
 </head>
 <body class="dashboard-page">
 
@@ -19,7 +164,6 @@
     
     <!-- 1. LEFT SIDEBAR NAVIGATION WITH SLIDER RESIZER -->
     <aside class="dash-left-sidebar" id="main-sidebar">
-      <!-- Draggable Slider Handle on Sidebar Edge -->
       <div class="sidebar-resizer" id="sidebar-resizer" title="Drag to minimize or maximize sidebar width (Double click to reset)"></div>
 
       <div>
@@ -28,47 +172,67 @@
             <img src="images/karman_logo_horizontal_navy.png" alt="KARMAN" class="sidebar-logo-full">
             <img src="images/karman_emblem_gold.png" alt="KARMAN" class="sidebar-logo-collapsed">
           </a>
-          <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" onclick="toggleSidebar()" title="Collapse / Expand Sidebar (or drag edge slider)">
+          <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" onclick="toggleSidebar()" title="Collapse / Expand Sidebar">
             <svg id="sidebar-toggle-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
           </button>
         </div>
 
-        <nav class="sidebar-menu" aria-label="Primary">
-          <button class="sidebar-item active" id="nav-dashboard" onclick="showPage('dashboard')" aria-current="page">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-            <span class="lbl">Livelihood Mapping</span>
+        <nav class="sidebar-menu" aria-label="Beneficiary Primary Navigation">
+          <!-- Separate Page 1: Livelihood Trade Identifier -->
+          <button class="sidebar-item active" id="nav-trade" onclick="showPage('trade')" aria-current="page">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/></svg>
+            <span class="lbl">Livelihood Trade Identifier</span>
           </button>
           
-          <button class="sidebar-item" id="nav-analyzer" onclick="showPage('analyzer')">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15l2 2 4-4"/></svg>
-            <span class="lbl">Resume Analyzer</span>
-          </button>
-          
-          <button class="sidebar-item" id="nav-projects" onclick="showPage('projects')">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4M12 2a6 6 0 0 0-4 10.5c.6.5 1 1.3 1 2.1V16h6v-1.4c0-.8.4-1.6 1-2.1A6 6 0 0 0 12 2z"/></svg>
-            <span class="lbl">Project Lab</span>
-          </button>
-          
-          <button class="sidebar-item" id="nav-roadmap" onclick="showPage('roadmap')">
+          <!-- Separate Page 2: Recommended Path -->
+          <button class="sidebar-item" id="nav-pathway" onclick="showPage('pathway')">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="19" r="2.2"/><circle cx="18" cy="5" r="2.2"/><path d="M6 16.8V13a4 4 0 0 1 4-4h4a4 4 0 0 0 4-4"/></svg>
-            <span class="lbl">Career Roadmap</span>
+            <span class="lbl">Recommended Path</span>
           </button>
           
+          <!-- Separate Page 3: Eligibility & Apply -->
+          <button class="sidebar-item" id="nav-eligibility" onclick="showPage('eligibility')">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span class="lbl">Eligibility Apply</span>
+          </button>
+          
+          <!-- Separate Page 4: Competency & Gap Checklist -->
+          <button class="sidebar-item" id="nav-gaps" onclick="showPage('gaps')">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            <span class="lbl">Competency & Gap Checklist</span>
+          </button>
+          
+          <!-- Separate Page 5: RPL Certification -->
+          <button class="sidebar-item" id="nav-rpl" onclick="showPage('rpl')">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+            <span class="lbl">RPL Certification</span>
+          </button>
+          
+          <!-- Separate Page 6: Micro-Enterprise Plan (Dynamic Grant Calculator) -->
+          <button class="sidebar-item" id="nav-enterprise" onclick="showPage('enterprise')">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            <span class="lbl">Micro-Enterprise Plan</span>
+          </button>
+          
+          <!-- Separate Page 7: Grant Document Checklist (Live Citizen Dossier) -->
+          <button class="sidebar-item" id="nav-dossier" onclick="showPage('dossier')">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+            <span class="lbl">Grant Document Checklist</span>
+          </button>
+          
+          <!-- Separate Page 8: Scheme Newsroom -->
           <button class="sidebar-item" id="nav-newsroom" onclick="showPage('newsroom')">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h13a3 3 0 0 1 3 3v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>
             <span class="lbl">Scheme Newsroom</span>
           </button>
           
-          <button class="sidebar-item" id="nav-telegram" onclick="showPage('telegram')">
+          <!-- Separate Page 9: Bot Assistant -->
+          <button class="sidebar-item" id="nav-bot" onclick="showPage('bot')">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 3 3 10.5l6 2.3M21 3l-3.5 17L11 15M21 3 9 13.4v5.1l3-3.1"/></svg>
             <span class="lbl">Bot Assistant</span>
           </button>
           
-          <button class="sidebar-item" id="nav-builder" onclick="showPage('builder')">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M9 13h6M9 17h6"/></svg>
-            <span class="lbl">Resume Builder</span>
-          </button>
-          
+          <!-- Settings -->
           <button class="sidebar-item" id="nav-settings" onclick="showPage('settings')">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
             <span class="lbl">Settings</span>
@@ -92,7 +256,7 @@
       </div>
 
       <div class="sidebar-logout">
-        <button class="sidebar-item" onclick="localStorage.removeItem('karman_user'); localStorage.removeItem('karman_token'); window.location.href='login.html'">
+        <button class="sidebar-item" onclick="localStorage.removeItem('karman_user'); localStorage.removeItem('karman_token'); localStorage.removeItem('karman_role'); window.location.href='login.html'">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
           <span class="lbl">Sign Out</span>
         </button>
@@ -104,18 +268,23 @@
       
       <div class="center-topbar" style="display:flex; justify-content:space-between; align-items:center; gap:16px;">
         <div style="display:flex; align-items:center; gap:14px; flex:1;">
-          <div class="search-input-wrap" style="max-width:320px; width:100%;">
+          <div class="search-input-wrap" style="max-width:340px; width:100%;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input placeholder="Search skills, NSQF trades, grants..." aria-label="Search skills, projects, schemes" id="main-search-input" />
+            <input placeholder="Search 9 NSQF trades, grants, DPRs..." aria-label="Search skills, projects, schemes" id="main-search-input" onkeyup="if(event.key==='Enter') executeLiveSearch(this.value);" />
           </div>
-          <span style="font-size:0.82rem; color:var(--ink-sub); font-style:italic; display:none;" class="karman-motto-text">"Your skills. Your livelihood. Your next step."</span>
+          <span style="font-size:0.82rem; color:var(--ink-sub); font-style:italic;" class="karman-motto-text">"Your skills. Your livelihood. Your next step."</span>
         </div>
 
         <div style="display:flex; align-items:center; gap:12px; flex-shrink:0;">
-          <!-- Notifications Pill -->
-          <button type="button" class="btn-ghost" style="padding:6px 10px; font-size:0.78rem; position:relative; border-radius:8px;" onclick="alert('📢 Latest District Update: PM-AJAY Camp scheduled in Gautam Buddha Nagar next Tuesday!')" title="District Notifications">
-            🔔 <span style="font-weight:600; margin-left:2px;">Updates</span>
-            <span style="width:7px; height:7px; background:#E53E3E; border-radius:50%; display:inline-block; margin-left:3px;"></span>
+          <!-- Action Card Trigger Button -->
+          <button type="button" class="btn-yellow-pill" style="padding:7px 13px; font-size:0.78rem;" onclick="openActionCardModal()" title="View & download official PM-AJAY Livelihood Action Card">
+            📋 <span style="font-weight:700; margin-left:3px;">Action Card</span>
+          </button>
+
+          <!-- District Notification Pill -->
+          <button type="button" class="btn-ghost" style="padding:6px 10px; font-size:0.78rem; position:relative; border-radius:8px;" onclick="alert('📢 Latest District Notice: Gautam Buddha Nagar Social Welfare PM-AJAY GIA verification camp active at Sector 62 PMKK Centre!')" title="District Notifications">
+            🔔 <span style="font-weight:600; margin-left:2px;">GBN Camp</span>
+            <span style="width:7px; height:7px; background:#10B981; border-radius:50%; display:inline-block; margin-left:3px;"></span>
           </button>
 
           <!-- Language Selector Toggle -->
@@ -124,72 +293,69 @@
             <button id="hdr-lang-en" type="button" onclick="setDashboardLanguage('en')" style="border:none; background:transparent; color:#5C564A; padding:4px 9px; border-radius:6px; cursor:pointer;" title="Switch to English">🇬🇧 EN</button>
           </div>
 
-          <!-- Beneficiary Profile Tag -->
+          <!-- Beneficiary Profile Tag (Fixed Role from Login) -->
           <div class="header-profile-tag" style="display:flex; align-items:center; gap:8px; background:#FFFFFF; border:1.5px solid var(--border-light); padding:4px 12px 4px 6px; border-radius:30px; cursor:pointer;" onclick="showPage('settings')">
             <span style="width:28px; height:28px; border-radius:50%; background:var(--yellow-hero); display:inline-flex; align-items:center; justify-content:center; font-weight:700; font-size:0.82rem; color:var(--navy-dark);" id="hdr-user-initials">S</span>
             <div style="line-height:1.2;">
               <div style="font-size:0.78rem; font-weight:700; color:var(--navy-dark);" id="hdr-user-name">Sunita Devi</div>
-              <div style="font-size:0.68rem; color:var(--green-text); font-weight:600;" id="hdr-user-role">Artisan · Level 4</div>
+              <div style="font-size:0.68rem; color:var(--green-text); font-weight:600;" id="hdr-user-role">Worker · Level 4</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- PAGE 1: BENEFICIARY / LIVELIHOOD MAPPING HOME -->
-      <div id="page-dashboard" class="page-view active">
+      <!-- ================================================================= -->
+      <!-- SEPARATE PAGE 1: LIVELIHOOD TRADE IDENTIFIER -->
+      <!-- ================================================================= -->
+      <div id="page-trade" class="page-view active">
         
-        <!-- SECTION 1: HERO "TELL US ABOUT YOURSELF" -->
-        <div class="center-hero-banner" style="background:var(--yellow-hero); border:1px solid var(--border-light); border-radius:16px; padding:28px 30px; margin-bottom:28px; display:flex; justify-content:space-between; align-items:center; position:relative; overflow:hidden;">
-          <div style="max-width:620px;">
+        <!-- Hero Header -->
+        <div class="center-hero-banner" style="background:var(--yellow-hero); border:1px solid var(--border-light); border-radius:16px; padding:26px 28px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; position:relative; overflow:hidden;">
+          <div style="max-width:640px;">
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-              <span class="eyebrow" style="color:var(--navy-dark); font-weight:700;">LIVELIHOOD & BENEFICIARY WORKSPACE</span>
-              <span style="background:rgba(22,32,53,0.08); color:var(--navy-dark); border:1px solid rgba(22,32,53,0.2); font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:9999px;">SIH26097</span>
+              <span class="eyebrow" style="color:var(--navy-dark); font-weight:800;">LIVELIHOOD TRADE IDENTIFIER</span>
+              <span style="background:rgba(22,32,53,0.08); color:var(--navy-dark); border:1px solid rgba(22,32,53,0.2); font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:9999px;">AI RAG ENGINE</span>
             </div>
             <h2 style="font-size:clamp(1.5rem, 2.2vw, 1.95rem); font-family:var(--font-display); font-weight:700; color:var(--navy-dark); line-height:1.2; margin:0 0 6px;">
-              What do you currently do?
+              Identify & Standardize Your Informal Trade
             </h2>
-            <p style="font-size:.9rem; color:#3A4763; margin-bottom:18px; line-height:1.55;">
-              Tell KARMAN about your work, skills, or what you want to become. We map your experience to official NSQF Qualification Packs, RPL Certification, and PM-AJAY Equipment Grants.
+            <p style="font-size:.9rem; color:#3A4763; margin-bottom:16px; line-height:1.55;">
+              Tell KARMAN about what work you do in daily life. Our vector engine maps your informal skills to the official National Skills Qualification Framework (NSQF) and unlocks PM-AJAY equipment grant linkage.
             </p>
 
-            <!-- 3 Persona 1-Click Pathways styled with KARMAN aesthetic -->
-            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(175px, 1fr)); gap:10px; margin-bottom:18px;">
-              <div class="persona-card" onclick="selectBeneficiaryPersona('youth')" style="background:#FFFFFF; border:1px solid var(--border-light); border-radius:10px; padding:12px 14px; cursor:pointer; transition:all .18s ease; box-shadow:0 1px 3px rgba(22,32,53,0.04);">
-                <div style="font-size:1.2rem; margin-bottom:4px;">🎓</div>
-                <div style="font-weight:700; font-size:0.84rem; color:var(--navy-dark);">I'm a Student / Youth</div>
-                <div style="font-size:0.72rem; color:var(--ink-sub); margin-top:2px;">Find my skill pathway →</div>
-              </div>
-
-              <div class="persona-card active-persona" onclick="selectBeneficiaryPersona('artisan')" style="background:#FFFFFF; border:2px solid var(--navy-dark); border-radius:10px; padding:12px 14px; cursor:pointer; transition:all .18s ease; box-shadow:0 2px 8px rgba(22,32,53,0.08);">
-                <div style="font-size:1.2rem; margin-bottom:4px;">🛠️</div>
-                <div style="font-weight:700; font-size:0.84rem; color:var(--navy-dark);">I'm a Worker / Artisan</div>
-                <div style="font-size:0.72rem; color:var(--ink-sub); margin-top:2px;">Get skills certified (RPL) →</div>
-              </div>
-
-              <div class="persona-card" onclick="selectBeneficiaryPersona('entrepreneur')" style="background:#FFFFFF; border:1px solid var(--border-light); border-radius:10px; padding:12px 14px; cursor:pointer; transition:all .18s ease; box-shadow:0 1px 3px rgba(22,32,53,0.04);">
-                <div style="font-size:1.2rem; margin-bottom:4px;">🏪</div>
-                <div style="font-weight:700; font-size:0.84rem; color:var(--navy-dark);">Micro-Entrepreneur</div>
-                <div style="font-size:0.72rem; color:var(--ink-sub); margin-top:2px;">Find capital grant support →</div>
-              </div>
-            </div>
-
-            <!-- Voice Intake Bar styled authentically -->
-            <div style="background:#FFFFFF; border:1.5px solid var(--border-light); border-radius:10px; padding:6px 8px; display:flex; align-items:center; gap:8px; box-shadow:0 2px 6px rgba(22,32,53,0.06);">
+            <!-- Voice & Text Intake Bar -->
+            <div style="background:#FFFFFF; border:1.5px solid var(--border-light); border-radius:10px; padding:6px 8px; display:flex; align-items:center; gap:8px; box-shadow:0 2px 6px rgba(22,32,53,0.06); margin-bottom:14px;">
               <button type="button" id="hero-mic-btn" onclick="startHeroVoiceIntake()" style="background:var(--navy-dark); color:#FFFFFF; border:none; border-radius:6px; padding:7px 12px; display:inline-flex; align-items:center; gap:6px; font-weight:600; font-size:0.78rem; cursor:pointer; flex-shrink:0;">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-                <span>बताइए आप क्या काम करते हैं...</span>
+                <span>बोलकर बताएं</span>
               </button>
-              <input type="text" id="hero-intake-input" placeholder="e.g., 'Mujhe 5 saal se silai ka kaam aata hai, certificate aur machine chahiye'" style="flex:1; border:none; outline:none; font-size:0.84rem; color:var(--navy-dark); font-family:var(--font-body); padding:4px;" onkeypress="if (event.key === 'Enter') processHeroIntake();">
-              <button class="btn-banner" onclick="processHeroIntake()" style="margin:0; padding:7px 16px; font-size:0.8rem; flex-shrink:0;">Map Skill →</button>
+              <input type="text" id="hero-intake-input" placeholder="e.g., 'Mujhe 5 saal se welding aur iron gate fabrication ka kaam aata hai'" style="flex:1; border:none; outline:none; font-size:0.84rem; color:var(--navy-dark); font-family:var(--font-body); padding:4px;" onkeypress="if (event.key === 'Enter') processHeroIntake();">
+              <button class="btn-banner" onclick="processHeroIntake()" style="margin:0; padding:7px 16px; font-size:0.8rem; flex-shrink:0;">Match Skill →</button>
+            </div>
+
+            <!-- 9 Official Trade Quick Selection Chips from n8n Skill Matrix -->
+            <div style="font-size:0.72rem; font-weight:700; color:var(--navy-dark); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em;">
+              Or select from 9 National Trade Standards:
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:6px;" id="trade-chips-container">
+              <button class="nsqf-chip active" onclick="applyNsqfTrade('AMH/Q1947')">🧵 Tailoring (AMH/Q1947)</button>
+              <button class="nsqf-chip" onclick="applyNsqfTrade('CSC/Q0204')">⚡ Welding (CSC/Q0204)</button>
+              <button class="nsqf-chip" onclick="applyNsqfTrade('ELE/Q6301')">🔌 Electrical (ELE/Q6301)</button>
+              <button class="nsqf-chip" onclick="applyNsqfTrade('SGJ/Q0101')">☀️ Solar Tech (SGJ/Q0101)</button>
+              <button class="nsqf-chip" onclick="applyNsqfTrade('PSC/Q0104')">🚰 Plumbing (PSC/Q0104)</button>
+              <button class="nsqf-chip" onclick="applyNsqfTrade('ASC/Q9703')">🚗 Driving (ASC/Q9703)</button>
+              <button class="nsqf-chip" onclick="applyNsqfTrade('SSC/Q2212')">💻 Data Entry (SSC/Q2212)</button>
+              <button class="nsqf-chip" onclick="applyNsqfTrade('AGR/Q4101')">🥛 Dairy (AGR/Q4101)</button>
+              <button class="nsqf-chip" onclick="applyNsqfTrade('ELE/Q4601')">📱 Mobile Repair (ELE/Q4601)</button>
             </div>
           </div>
           <img src="images/study_hero.jpg" alt="Learner Desk" class="banner-img-thumb" style="display:block;">
         </div>
 
-        <!-- SECTION 2 & 3: LIVELIHOOD PROFILE CARD & RECOMMENDED PATHWAY -->
-        <div style="display:grid; grid-template-columns:360px 1fr; gap:20px; margin-bottom:24px;" class="beneficiary-mid-grid">
+        <!-- Trade Detailed Information Cards -->
+        <div style="display:grid; grid-template-columns:1.1fr 0.9fr; gap:20px; margin-bottom:24px;" class="beneficiary-mid-grid">
           
-          <!-- SECTION 2: LIVELIHOOD PROFILE CARD -->
+          <!-- Card 1: Identified Trade Profile -->
           <div class="table-card" style="padding:22px 24px; border:2px solid var(--navy-dark); position:relative;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
               <div>
@@ -203,50 +369,116 @@
 
             <div style="background:#FAF8F4; border:1px solid var(--border-light); border-radius:10px; padding:12px 14px; margin-bottom:16px;">
               <div style="font-size:0.78rem; color:var(--ink-sub); margin-bottom:2px;">National Qualification Pack (QP Code):</div>
-              <strong style="font-size:0.88rem; color:var(--navy-dark); display:block;" id="bene-qp-code">AMH/Q0301 — Sewing Machine Operator</strong>
-              <div style="font-size:0.74rem; color:var(--ink-sub); margin-top:4px;">Sector: Apparel, Made-Ups & Home Furnishing SSC</div>
+              <strong style="font-size:0.88rem; color:var(--navy-dark); display:block;" id="bene-qp-code">AMH/Q1947 — Self Employed Tailor / Sewing Operator</strong>
+              <div style="font-size:0.74rem; color:var(--ink-sub); margin-top:4px;" id="bene-sector-desc">Sector: Apparel, Made-Ups & Home Furnishing Sector Skill Council</div>
             </div>
 
             <div class="readiness-row" style="margin-bottom:6px;">
-              <span style="font-weight:600; font-size:.88rem;">Prior Experience Alignment</span>
+              <span style="font-weight:600; font-size:.88rem;">Prior Experience Alignment Score</span>
               <span class="pct" id="bene-readiness-pct" style="color:var(--green-text); font-weight:800;">88%</span>
             </div>
-            <div class="progress-track" style="margin-bottom:14px;"><span id="bene-readiness-bar" style="width:88%; background:var(--green-text);"></span></div>
+            <div class="progress-track" style="margin-bottom:16px;"><span id="bene-readiness-bar" style="width:88%; background:var(--green-text);"></span></div>
 
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:0.78rem; margin-bottom:16px;">
-              <div style="background:#F1F5F9; padding:8px 10px; border-radius:8px;">
-                <span style="color:var(--ink-sub); display:block; font-size:0.7rem;">Practical Exp:</span>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:0.78rem; margin-bottom:18px;">
+              <div style="background:#F1F5F9; padding:9px 12px; border-radius:8px;">
+                <span style="color:var(--ink-sub); display:block; font-size:0.7rem;">Practical Experience:</span>
                 <strong id="bene-exp-val">5+ Years (Informal)</strong>
               </div>
-              <div style="background:#F1F5F9; padding:8px 10px; border-radius:8px;">
+              <div style="background:#F1F5F9; padding:9px 12px; border-radius:8px;">
                 <span style="color:var(--ink-sub); display:block; font-size:0.7rem;">Target Outcome:</span>
-                <strong>Micro-Enterprise</strong>
+                <strong id="bene-outcome-val">Home-based Micro-Enterprise</strong>
+              </div>
+              <div style="background:#F1F5F9; padding:9px 12px; border-radius:8px;">
+                <span style="color:var(--ink-sub); display:block; font-size:0.7rem;">Entry Requirement:</span>
+                <strong id="bene-entry-val">5th Class / Informal exp.</strong>
+              </div>
+              <div style="background:#F1F5F9; padding:9px 12px; border-radius:8px;">
+                <span style="color:var(--ink-sub); display:block; font-size:0.7rem;">Benchmark Monthly Earning:</span>
+                <strong id="bene-wage-val" style="color:var(--green-text);">₹18,000 – ₹24,000</strong>
               </div>
             </div>
 
-            <button class="btn-yellow-pill" style="width:100%; justify-content:center; padding:9px; font-size:0.84rem;" onclick="showPage('builder')">
-              Download Skill Passport (PDF) ↓
-            </button>
+            <div style="display:flex; gap:10px;">
+              <button class="btn-navy-pill" style="flex:1; justify-content:center; padding:9px; font-size:0.82rem;" onclick="showPage('pathway')">
+                View 6-Stage Roadmap →
+              </button>
+              <button class="btn-yellow-pill" style="flex:1; justify-content:center; padding:9px; font-size:0.82rem;" onclick="openActionCardModal()">
+                Download Action Card ↓
+              </button>
+            </div>
           </div>
 
-          <!-- SECTION 3: YOUR RECOMMENDED PATH (6-STAGE PIPELINE) -->
+          <!-- Card 2: NSQF Standards & Statutory Linkage -->
           <div class="table-card" style="padding:22px 24px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-              <div>
-                <span class="eyebrow" style="color:var(--navy-dark); font-weight:700;">YOUR RECOMMENDED PATH</span>
-                <h3 style="font-size:1.15rem; margin-top:2px;">Informal Skill to Micro-Enterprise Pipeline</h3>
-              </div>
-              <span style="font-size:0.75rem; background:#EBF4FF; color:#1E40AF; padding:3px 8px; border-radius:6px; font-weight:600;">6 Stage Track</span>
+            <div style="margin-bottom:12px;">
+              <span class="eyebrow" style="color:#B45309; font-weight:700;">STATUTORY SCHEME LINKAGE</span>
+              <h3 style="font-size:1.15rem; margin-top:2px;">Government Benefits for this Trade</h3>
             </div>
 
-            <!-- 6 Stages Stepper -->
+            <div style="background:#FAF8F4; border:1px solid var(--border-light); border-radius:10px; padding:12px 14px; margin-bottom:12px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="font-size:0.88rem; color:var(--navy-dark);">PM-AJAY Capital Grant</strong>
+                <span style="font-size:0.85rem; font-weight:800; color:var(--green-text);">Up to ₹50,000</span>
+              </div>
+              <p style="font-size:0.78rem; color:var(--ink-sub); margin:4px 0 0; line-height:1.4;">
+                100% Capital subsidy for purchasing specialized trade machinery. No loan repayment required for verified SC beneficiaries.
+              </p>
+            </div>
+
+            <div style="background:#FAF8F4; border:1px solid var(--border-light); border-radius:10px; padding:12px 14px; margin-bottom:12px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="font-size:0.88rem; color:var(--navy-dark);">PMKVY 4.0 RPL Certification</strong>
+                <span style="font-size:0.85rem; font-weight:800; color:var(--navy-dark);">₹500 DBT Reward</span>
+              </div>
+              <p style="font-size:0.78rem; color:var(--ink-sub); margin:4px 0 0; line-height:1.4;">
+                12-hour orientation camp certifying your existing hands-on skills with Skill India Digital QR credentials.
+              </p>
+            </div>
+
+            <div style="background:#FAF8F4; border:1px solid var(--border-light); border-radius:10px; padding:12px 14px; margin-bottom:16px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="font-size:0.88rem; color:var(--navy-dark);">NSFDC Concessional Loan</strong>
+                <span style="font-size:0.85rem; font-weight:800; color:#1E40AF;">6.0% Interest</span>
+              </div>
+              <p style="font-size:0.78rem; color:var(--ink-sub); margin:4px 0 0; line-height:1.4;">
+                Concessional balance financing for project costs above ₹50,000. Saves ₹15,000+ over commercial banks.
+              </p>
+            </div>
+
+            <div style="display:flex; gap:10px;">
+              <button class="btn-navy-pill" style="width:100%; justify-content:center; padding:9px; font-size:0.82rem;" onclick="showPage('enterprise')">
+                Calculate Grant for this Trade →
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- SEPARATE PAGE 2: RECOMMENDED PATH (6-STAGE PIPELINE) -->
+      <!-- ================================================================= -->
+      <div id="page-pathway" class="page-view">
+        <div style="background:#FFFFFF; border:1.5px solid var(--border-light); border-radius:16px; padding:24px 28px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <span class="eyebrow" style="color:var(--navy-dark); font-weight:700;">YOUR RECOMMENDED PATH</span>
+            <h2 style="font-size:1.75rem; margin-top:2px;">6-Stage Informal Skill to Micro-Enterprise Pipeline</h2>
+            <p style="color:var(--ink-sub); font-size:.88rem; margin-top:4px;">Structured progression track taking your uncertified experience to a funded registered enterprise.</p>
+          </div>
+          <span style="font-size:0.82rem; background:#EBF4FF; color:#1E40AF; padding:6px 14px; border-radius:8px; font-weight:700;">Stages 1 to 3 Completed</span>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1.2fr 0.8fr; gap:24px;">
+          
+          <!-- 6-Stage Stepper -->
+          <div class="table-card" style="padding:24px;">
             <div class="bene-pipeline-track">
               <!-- Stage 1 -->
               <div class="bene-step done">
                 <div class="step-num">✓</div>
                 <div class="step-content">
-                  <div class="step-head">1. Current Experience</div>
-                  <div class="step-sub">5 yrs informal stitching & alterations mapped</div>
+                  <div class="step-head">1. Current Experience Intake</div>
+                  <div class="step-sub">Informal hands-on experience captured via voice & text interview</div>
                 </div>
                 <span class="step-badge success">COMPLETED</span>
               </div>
@@ -255,8 +487,8 @@
               <div class="bene-step done">
                 <div class="step-num">✓</div>
                 <div class="step-content">
-                  <div class="step-head">2. Skill Identified</div>
-                  <div class="step-sub">Sewing Machine Operator mapped via RAG</div>
+                  <div class="step-head">2. Skill & Trade Identification</div>
+                  <div class="step-sub" id="path-stage2-sub">Mapped to National Qualification Pack AMH/Q1947 via RAG</div>
                 </div>
                 <span class="step-badge success">COMPLETED</span>
               </div>
@@ -266,7 +498,7 @@
                 <div class="step-num">✓</div>
                 <div class="step-content">
                   <div class="step-head">3. NSQF Level Alignment</div>
-                  <div class="step-sub">Standardized to National Level 4 (AMH/Q0301)</div>
+                  <div class="step-sub" id="path-stage3-sub">Standardized to National NSQF Level 4 under Ministry guidelines</div>
                 </div>
                 <span class="step-badge success">COMPLETED</span>
               </div>
@@ -275,8 +507,8 @@
               <div class="bene-step active">
                 <div class="step-num">4</div>
                 <div class="step-content">
-                  <div class="step-head">4. RPL Certification</div>
-                  <div class="step-sub">12-hr orientation camp + digital assessment</div>
+                  <div class="step-head">4. RPL Certification (PMKVY 4.0)</div>
+                  <div class="step-sub">12-hour orientation camp + QR-coded Skill India Digital Certificate + ₹500 DBT</div>
                 </div>
                 <span class="step-badge rec">RECOMMENDED</span>
               </div>
@@ -285,8 +517,8 @@
               <div class="bene-step pending">
                 <div class="step-num">5</div>
                 <div class="step-content">
-                  <div class="step-head">5. Government Support</div>
-                  <div class="step-sub">PM-AJAY Capital Grant (Up to ₹50,000)</div>
+                  <div class="step-head">5. Government Support (PM-AJAY)</div>
+                  <div class="step-sub">100% Capital Grant for machinery purchase up to ₹50,000</div>
                 </div>
                 <span class="step-badge pend">PENDING RPL</span>
               </div>
@@ -295,472 +527,697 @@
               <div class="bene-step pending">
                 <div class="step-num">6</div>
                 <div class="step-content">
-                  <div class="step-head">6. Livelihood / Enterprise</div>
-                  <div class="step-sub">Home-based Boutique & Custom Tailoring Unit</div>
+                  <div class="step-head">6. Livelihood / Enterprise Launch</div>
+                  <div class="step-sub" id="path-stage6-sub">Sustainable micro-enterprise unit generating ₹18,000 – ₹24,000/mo</div>
                 </div>
-                <span class="step-badge pend">GOAL</span>
+                <span class="step-badge pend">FINAL GOAL</span>
               </div>
             </div>
           </div>
+
+          <!-- Stage Details & Action -->
+          <div class="table-card" style="padding:24px; border-left:4px solid var(--yellow-hero);">
+            <span class="eyebrow" style="color:var(--navy-dark); font-weight:700;">CURRENT IMMEDIATE FOCUS</span>
+            <h3 style="font-size:1.2rem; margin:4px 0 10px;">Complete Stage 4: RPL Camp</h3>
+            <p style="font-size:0.85rem; color:var(--ink-sub); line-height:1.5; margin-bottom:14px;">
+              You do not need to attend a 6-month classroom training. Recognition of Prior Learning assesses the skills you already use daily.
+            </p>
+
+            <div style="background:#FAF8F4; padding:12px 14px; border-radius:10px; border:1px solid var(--border-light); font-size:0.8rem; margin-bottom:16px;">
+              <div>📍 <strong>Nearest Camp:</strong> Sector 62 PMKK Centre, Noida</div>
+              <div style="margin-top:4px;">⏱️ <strong>Camp Timing:</strong> Next Tuesday, 10:00 AM – 4:00 PM</div>
+              <div style="margin-top:4px;">🎁 <strong>Incentive:</strong> ₹500 directly credited to Aadhaar bank account</div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <button class="btn-navy-pill" style="justify-content:center; padding:10px; font-size:0.84rem;" onclick="showPage('rpl')">
+                Go to RPL Certification Page →
+              </button>
+              <button class="btn-ghost" style="justify-content:center; padding:8px; font-size:0.82rem;" onclick="showPage('enterprise')">
+                Preview Micro-Enterprise Plan
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- SEPARATE PAGE 3: ELIGIBILITY APPLY -->
+      <!-- ================================================================= -->
+      <div id="page-eligibility" class="page-view">
+        <div style="background:#FFFFFF; border:1.5px solid var(--border-light); border-radius:16px; padding:24px 28px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <span class="eyebrow" style="color:#B45309; font-weight:700;">DIRECT BENEFIT LINKAGE</span>
+            <h2 style="font-size:1.75rem; margin-top:2px;">Statutory Scheme Eligibility Matrix</h2>
+            <p style="color:var(--ink-sub); font-size:.88rem; margin-top:4px;">Evaluation against Ministry of Social Justice & Empowerment PM-AJAY GIA Guidelines.</p>
+          </div>
+          <span style="font-size:0.82rem; background:#DCFCE7; color:#15803D; padding:6px 14px; border-radius:8px; font-weight:700;">All Criteria Matched (100%)</span>
         </div>
 
-        <!-- SECTION 4 & 5: GOVERNMENT SUPPORT CARD & SKILL GAP RADAR -->
-        <div style="display:grid; grid-template-columns:1.1fr 0.9fr; gap:20px; margin-bottom:24px;" class="beneficiary-scheme-gap-grid">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px;">
           
-          <!-- SECTION 4: GOVERNMENT SUPPORT & SCHEMES CARD -->
-          <div class="table-card" style="padding:22px 24px; border-left:4px solid #F4C542;">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
-              <div>
-                <span class="eyebrow" style="color:#B45309; font-weight:700;">DIRECT BENEFIT LINKAGE</span>
-                <h3 style="font-size:1.25rem; margin-top:2px;">Government Scheme & Equipment Support</h3>
-              </div>
-              <span style="background:#FEF3C7; color:#92400E; font-size:0.72rem; font-weight:700; padding:3px 8px; border-radius:6px;">OFFICIAL SCHEME</span>
-            </div>
+          <!-- PM-AJAY Eligibility Criteria Card -->
+          <div class="table-card" style="padding:22px 24px; border-top:4px solid var(--green-text);">
+            <h3 style="font-size:1.15rem; margin-bottom:4px;">PM-AJAY GIA Criteria (Grant up to ₹50,000)</h3>
+            <p style="font-size:0.82rem; color:var(--ink-sub); margin-bottom:16px;">Pradhan Mantri Anusuchit Jaati Abhyuday Yojana Special Central Assistance</p>
 
-            <div style="background:#FAF8F4; border:1px solid var(--border-light); border-radius:12px; padding:16px; margin-bottom:14px;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                <strong style="font-size:1.02rem; color:var(--navy-dark);">PM-AJAY (Pradhan Mantri Anusuchit Jaati Abhyuday Yojana)</strong>
-                <span style="font-size:1.15rem; font-weight:800; color:var(--green-text);">Up to ₹50,000</span>
-              </div>
-              <p style="font-size:0.85rem; color:var(--ink-sub); line-height:1.45; margin-bottom:10px;">
-                100% Capital Grant for purchasing self-employment equipment (motorized sewing machine, cutting table, and electric iron). No loan repayment required for verified beneficiaries.
-              </p>
-              
-              <!-- Source Verification Citation -->
-              <div style="display:flex; align-items:center; gap:6px; font-size:0.74rem; color:#475569; background:#FFFFFF; padding:6px 10px; border-radius:6px; border:1px solid #E2E8F0;">
-                <span>🔗</span>
-                <span><strong>Verified Source:</strong> PM-AJAY Guidelines 2024-25, Section 4.2 (GIA Micro-Enterprises) · Page 38</span>
-              </div>
-            </div>
-
-            <!-- Secondary Scheme PM Vishwakarma -->
-            <div style="background:#FAF8F4; border:1px solid var(--border-light); border-radius:12px; padding:14px; margin-bottom:16px;">
-              <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; flex-direction:column; gap:10px; font-size:0.82rem;">
+              <div style="display:flex; justify-content:space-between; align-items:center; background:#F0FDF4; padding:10px 12px; border-radius:8px; border:1px solid #BBF7D0;">
                 <div>
-                  <strong style="font-size:0.92rem; color:var(--navy-dark);">PM-Vishwakarma Yojana</strong>
-                  <div style="font-size:0.78rem; color:var(--ink-sub); margin-top:2px;">Collateral-free credit up to ₹1,00,000 @ 5% interest + ₹15,000 Toolkit E-Voucher</div>
+                  <strong>Social Category:</strong> Scheduled Caste (SC) Verified
+                  <div style="font-size:0.72rem; color:#166534;">Certificate verified via District Revenue Authority</div>
                 </div>
-                <span style="font-size:0.85rem; font-weight:700; color:var(--navy-dark);">₹15,000 Voucher</span>
+                <span class="dossier-status-pill verified">PASSED ✓</span>
               </div>
-            </div>
 
-            <div style="display:flex; gap:10px;">
-              <button class="btn-navy-pill" onclick="alert('Checking eligibility for Gautam Buddha Nagar... All criteria matched!')">Check Eligibility & Apply →</button>
-              <button class="btn-ghost" onclick="showPage('newsroom')">View Scheme Guidelines</button>
-            </div>
-          </div>
-
-          <!-- SECTION 5: SKILL GAP RADAR (DUAL-CARD BREAKDOWN) -->
-          <div class="table-card" style="padding:22px 24px;">
-            <div style="margin-bottom:12px;">
-              <span class="eyebrow" style="color:var(--navy-dark); font-weight:700;">NSQF LEVEL 4 RADAR</span>
-              <h3 style="font-size:1.15rem; margin-top:2px;">Verified Competencies vs Gaps</h3>
-            </div>
-
-            <!-- Skills You Have -->
-            <div style="margin-bottom:14px;">
-              <div style="font-size:0.78rem; font-weight:700; color:var(--green-text); margin-bottom:6px; display:flex; align-items:center; gap:4px;">
-                <span>✓ SKILLS YOU ALREADY HAVE (VERIFIED)</span>
-              </div>
-              <div style="display:flex; flex-direction:column; gap:6px;">
-                <div style="background:#F0FDF4; border:1px solid #BBF7D0; padding:6px 10px; border-radius:6px; font-size:0.8rem; color:#166534;">
-                  ✓ Single needle lockstitch machine operation
+              <div style="display:flex; justify-content:space-between; align-items:center; background:#F0FDF4; padding:10px 12px; border-radius:8px; border:1px solid #BBF7D0;">
+                <div>
+                  <strong>Annual Family Income:</strong> Under ₹2,50,000 / Year
+                  <div style="font-size:0.72rem; color:#166534;">Beneficiary income ₹1,20,000/yr (Within statutory limit)</div>
                 </div>
-                <div style="background:#F0FDF4; border:1px solid #BBF7D0; padding:6px 10px; border-radius:6px; font-size:0.8rem; color:#166534;">
-                  ✓ Fabric cutting & pattern alignment
+                <span class="dossier-status-pill verified">PASSED ✓</span>
+              </div>
+
+              <div style="display:flex; justify-content:space-between; align-items:center; background:#F0FDF4; padding:10px 12px; border-radius:8px; border:1px solid #BBF7D0;">
+                <div>
+                  <strong>Age Limit:</strong> 18 – 50 Years
+                  <div style="font-size:0.72rem; color:#166534;">Verified via Aadhaar card</div>
                 </div>
-                <div style="background:#F0FDF4; border:1px solid #BBF7D0; padding:6px 10px; border-radius:6px; font-size:0.8rem; color:#166534;">
-                  ✓ Garment alterations & finishing
+                <span class="dossier-status-pill verified">PASSED ✓</span>
+              </div>
+
+              <div style="display:flex; justify-content:space-between; align-items:center; background:#F0FDF4; padding:10px 12px; border-radius:8px; border:1px solid #BBF7D0;">
+                <div>
+                  <strong>Bank Account:</strong> Aadhaar DBT Seeded (NPCI)
+                  <div style="font-size:0.72rem; color:#166534;">State Bank of India — Active for direct transfer</div>
                 </div>
+                <span class="dossier-status-pill verified">PASSED ✓</span>
               </div>
             </div>
 
-            <!-- Skills to Strengthen -->
-            <div>
-              <div style="font-size:0.78rem; font-weight:700; color:#B45309; margin-bottom:6px; display:flex; align-items:center; gap:4px;">
-                <span>○ SKILLS TO STRENGTHEN (TO BE CERTIFIED)</span>
-              </div>
-              <div style="display:flex; flex-direction:column; gap:6px;">
-                <div style="background:#FFFBEB; border:1px solid #FDE68A; padding:6px 10px; border-radius:6px; font-size:0.8rem; color:#92400E;">
-                  ○ Motorized overlock machine maintenance
-                </div>
-                <div style="background:#FFFBEB; border:1px solid #FDE68A; padding:6px 10px; border-radius:6px; font-size:0.8rem; color:#92400E;">
-                  ○ Workplace safety & ergonomic positioning
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- SECTION 6, 7 & 8: RPL CERTIFICATION, MICRO-PROJECT PLAN & DOCUMENT CHECKLIST -->
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:20px; margin-bottom:24px;">
-          
-          <!-- SECTION 6: RECOMMENDED TRAINING / CERTIFICATION (RPL) -->
-          <div class="table-card" style="padding:20px 22px;">
-            <span class="eyebrow" style="color:var(--navy-dark); font-weight:700;">NEXT BEST STEP</span>
-            <h4 style="font-size:1.08rem; margin-top:2px;">RPL Certification (PMKVY 4.0)</h4>
-            <p style="font-size:0.82rem; color:var(--ink-sub); margin:6px 0 12px; line-height:1.45;">
-              You already have 5 years of practical experience. Recognition of Prior Learning (RPL) certifies your existing skills without a 6-month classroom course.
-            </p>
-            <div style="background:#FAF8F4; padding:10px; border-radius:8px; border:1px solid var(--border-light); font-size:0.78rem; margin-bottom:14px;">
-              <div>⏱️ <strong>Duration:</strong> 12 Hours Orientation</div>
-              <div style="margin-top:2px;">💰 <strong>Cost:</strong> 100% Free (Govt. Sponsored)</div>
-              <div style="margin-top:2px;">🎁 <strong>Stipend:</strong> ₹500 on assessment completion</div>
-            </div>
-            <button class="btn-navy-pill" style="width:100%; justify-content:center; padding:8px; font-size:0.82rem;" onclick="alert('Finding nearest RPL Center in Gautam Buddha Nagar: Sector 62 Skill Camp available!')">Explore RPL Centers →</button>
-          </div>
-
-          <!-- SECTION 7: RECOMMENDED LIVELIHOOD / PROJECT PLAN -->
-          <div class="table-card" style="padding:20px 22px;">
-            <span class="eyebrow" style="color:var(--navy-dark); font-weight:700;">MICRO-ENTERPRISE PLAN</span>
-            <h4 style="font-size:1.08rem; margin-top:2px;">Home-based Tailoring Unit</h4>
-            <p style="font-size:0.82rem; color:var(--ink-sub); margin:6px 0 12px; line-height:1.45;">
-              Turn your certified skill into a sustainable livelihood with high local demand and grant backing.
-            </p>
-            <div style="background:#FAF8F4; padding:10px; border-radius:8px; border:1px solid var(--border-light); font-size:0.78rem; margin-bottom:14px;">
-              <div>⚙️ <strong>Equipment:</strong> Industrial Motorized Machine</div>
-              <div style="margin-top:2px;">💵 <strong>Setup Cost:</strong> ₹65,000 (₹50k PM-AJAY Grant)</div>
-              <div style="margin-top:2px;">📈 <strong>Est. Monthly Income:</strong> ₹18,000 – ₹24,000</div>
-            </div>
-            <button class="btn-navy-pill" style="width:100%; justify-content:center; padding:8px; font-size:0.82rem;" onclick="showPage('builder')">View Full Project Report →</button>
-          </div>
-
-          <!-- SECTION 8: DOCUMENT READINESS CHECKLIST -->
-          <div class="table-card" style="padding:20px 22px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <span class="eyebrow" style="color:var(--navy-dark); font-weight:700;">APPLICATION READINESS</span>
-              <span style="font-size:0.74rem; font-weight:700; color:var(--green-text);">3 of 5 READY</span>
-            </div>
-            <h4 style="font-size:1.08rem;">Grant Document Checklist</h4>
-            <div style="display:flex; flex-direction:column; gap:6px; margin:10px 0 14px; font-size:0.78rem;">
-              <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                <input type="checkbox" checked disabled> <span>Aadhaar (Mobile Linked) ✓</span>
-              </label>
-              <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                <input type="checkbox" checked disabled> <span>Bank Account (Aadhaar DBT Seeded) ✓</span>
-              </label>
-              <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                <input type="checkbox" checked disabled> <span>Caste / Community Certificate ✓</span>
-              </label>
-              <label style="display:flex; align-items:center; gap:8px; cursor:pointer; color:#B45309;">
-                <input type="checkbox" onchange="alert('Self declaration template generated!')"> <span>Trade Experience Self-Declaration</span>
-              </label>
-              <label style="display:flex; align-items:center; gap:8px; cursor:pointer; color:#B45309;">
-                <input type="checkbox" onchange="alert('Income verification linked via DigiLocker!')"> <span>Income / Ration Card</span>
-              </label>
-            </div>
-            <button class="btn-yellow-pill" style="width:100%; justify-content:center; padding:8px; font-size:0.82rem;" onclick="alert('Submitting verified document package to District Nodal Officer!')">Submit Application Package →</button>
-          </div>
-
-        </div>
-
-      </div>
-
-      <!-- PAGE 2: RESUME ANALYZER & ATS SCORER -->
-      <div id="page-analyzer" class="page-view">
-        <div style="background:var(--blue-badge); border:1.5px solid var(--navy-dark); border-radius:16px; padding:24px 28px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center;">
-          <div>
-            <span class="eyebrow" style="color:var(--blue-text); font-weight:600;">LIVE ATS ENGINE & SKILL GAP RADAR</span>
-            <h2 style="font-size:1.8rem; margin-top:4px;">Resume Analyzer & ATS Scorer</h2>
-            <p style="color:var(--ink-sub); font-size:.88rem; margin-top:4px;">Live evaluation against National Skills Qualification Framework (NSQF) & Tech Standards via backend.</p>
-          </div>
-          <img src="images/todo_sketch.jpg" alt="Checklist" style="width:110px; height:80px; object-fit:cover; border-radius:10px; border:2px solid var(--navy-dark);">
-        </div>
-
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
-          <!-- 1. File Upload Dropzone -->
-          <div class="table-card dropzone" id="dropzone" style="border-style:dashed; text-align:center; padding:28px;"
-               ondragover="event.preventDefault(); dropzone.classList.add('drag-over')"
-               ondragleave="dropzone.classList.remove('drag-over')"
-               ondrop="handleDrop(event)">
-            <svg width="50" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--navy-dark)" stroke-width="1.8" style="margin-bottom:8px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            <h4 style="font-size:1.05rem; margin-bottom:4px;">Upload Resume File</h4>
-            <p style="font-size:.8rem; color:var(--ink-sub); margin:0 0 14px;">PDF, DOCX or TXT formats supported</p>
-            <button class="btn-navy-pill" type="button" onclick="document.getElementById('resume-file').click()">Select File</button>
-            <input type="file" id="resume-file" accept=".pdf,.docx,.txt" style="display:none;" onchange="handleFileSelect(this.files)">
-          </div>
-
-          <!-- 2. Or Paste Text Box with Quick Samples -->
-          <div class="table-card" style="padding:22px 24px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-              <h4 style="font-size:.98rem; font-weight:700;">Or Paste Resume Content / Bullets</h4>
-              <div style="display:flex; gap:6px;">
-                <button type="button" class="btn-ghost" style="padding:3px 8px; font-size:.72rem;" onclick="loadSampleResumeText('ai')">Sample AI/ML</button>
-                <button type="button" class="btn-ghost" style="padding:3px 8px; font-size:.72rem;" onclick="loadSampleResumeText('fullstack')">Sample FullStack</button>
-                <button type="button" class="btn-ghost" style="padding:3px 8px; font-size:.72rem;" onclick="loadSampleResumeText('tailor')">Sample Tailor</button>
-              </div>
-            </div>
-            <textarea id="analyzer-text-input" placeholder="Paste your skills, experience, and project descriptions here…" style="width:100%; height:90px; border:1.5px solid var(--border-light); border-radius:8px; padding:8px 12px; font-family:var(--font-body); font-size:.82rem; resize:vertical; box-sizing:border-box;">Developed machine learning models using Python and Scikit-learn. Familiar with SQL queries, Git version control, REST APIs, and Docker containers.</textarea>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
-              <div style="display:flex; align-items:center; gap:8px;">
-                <label for="analyzer-role-select" style="font-size:.78rem; font-weight:600;">Target Role:</label>
-                <select id="analyzer-role-select" class="select-fake" style="padding:4px 10px; font-size:.8rem;">
-                  <option value="AI / ML Engineer">AI / ML Engineer</option>
-                  <option value="Full-Stack Developer">Full-Stack Developer</option>
-                  <option value="Data Engineer">Data Engineer</option>
-                  <option value="Tailoring & Sewing">Tailoring & Sewing Operator</option>
-                  <option value="Two Wheeler Mechanic">Two Wheeler Service Tech</option>
-                </select>
-              </div>
-              <button class="btn-navy-pill" type="button" id="btn-run-analyzer" onclick="runManualTextAnalysis()" style="padding:7px 16px; font-size:.82rem;">Scan & Score ATS →</button>
-            </div>
-          </div>
-        </div>
-
-        <div id="file-result"></div>
-      </div>
-
-      <!-- PAGE 3: PROJECT LAB -->
-      <div id="page-projects" class="page-view">
-        <div style="background:var(--navy-dark); color:#fff; border-radius:16px; padding:24px 28px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center;">
-          <div>
-            <span class="eyebrow" style="color:var(--yellow-hero);">HANDS-ON LAB</span>
-            <h2 style="font-size:1.8rem; margin-top:4px; color:#fff;">Applied Skill Projects</h2>
-            <p style="color:rgba(255,255,255,.75); font-size:.88rem; margin-top:4px;">Peer pods & milestone projects that close verified technical gaps.</p>
-          </div>
-          <img src="images/team_table.jpg" alt="Team Lab" style="width:120px; height:80px; object-fit:cover; border-radius:10px; border:2px solid #fff;">
-        </div>
-
-        <div class="table-card" style="margin-bottom:16px;">
-          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-            <div>
-              <span class="eyebrow" style="color:var(--green-text);">RECOMMENDED FOR YOU</span>
-              <h3 style="font-size:1.2rem; margin-top:4px;">1. ML Model API with FastAPI & Docker</h3>
-              <p style="font-size:.86rem; color:var(--ink-sub); margin-top:6px;">Build and containerize a high-performance REST API predicting student readiness metrics. Closes containerization and API deployment gaps.</p>
-            </div>
-            <span style="background:var(--yellow-hero); font-weight:700; font-size:.76rem; padding:4px 10px; border-radius:8px;">2 WEEKS</span>
-          </div>
-          <button class="btn-navy-pill" style="margin-top:16px;" onclick="alert('Milestone initiated! Repo cloned to your local workspace.')">Start Project Milestone →</button>
-        </div>
-
-        <div class="table-card">
-          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-            <div>
-              <span class="eyebrow" style="color:var(--ink-sub);">UPCOMING LAB</span>
-              <h3 style="font-size:1.2rem; margin-top:4px;">2. RAG Assistant with Pinecone & LangChain</h3>
-              <p style="font-size:.86rem; color:var(--ink-sub); margin-top:6px;">Connect multi-lingual government PDF gazettes to a vector database for semantic guideline retrieval.</p>
-            </div>
-            <span style="background:var(--paper-bg); border:1px solid var(--border-light); font-size:.76rem; padding:4px 10px; border-radius:8px;">3 WEEKS</span>
-          </div>
-          <button class="btn-ghost" style="margin-top:16px;" onclick="alert('Prerequisites: Complete Milestone 1 first.')">Unlock Requirements</button>
-        </div>
-      </div>
-
-      <!-- PAGE 4: ROADMAP -->
-      <div id="page-roadmap" class="page-view">
-        <div style="background:var(--yellow-hero); border:2px solid var(--navy-dark); border-radius:16px; padding:26px 28px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
-          <div>
-            <span class="eyebrow" style="color:var(--navy-dark); font-weight:700;">DYNAMIC CAREER PATHWAY</span>
-            <h2 style="font-size:1.8rem; margin-top:4px;" id="roadmap-page-title">Project Roadmap: AI / ML Engineer</h2>
-            <p style="color:#3A4763; margin-top:4px; font-size:.88rem;">Synchronized directly with industry standards & backend API.</p>
-          </div>
-          <div class="role-selector-pill-group" style="display:flex; gap:8px;">
-            <button class="btn-ghost active" id="btn-roadmap-ai" style="padding:6px 14px; font-size:.78rem; font-weight:600; background:var(--navy-dark); color:#fff;" onclick="selectRoadmapRole('AI / ML Engineer')">AI / ML</button>
-            <button class="btn-ghost" id="btn-roadmap-fs" style="padding:6px 14px; font-size:.78rem; font-weight:600;" onclick="selectRoadmapRole('Full-Stack Developer')">Full-Stack</button>
-            <button class="btn-ghost" id="btn-roadmap-de" style="padding:6px 14px; font-size:.78rem; font-weight:600;" onclick="selectRoadmapRole('Data Engineer')">Data Engineer</button>
-          </div>
-        </div>
-
-        <div class="table-card" id="roadmap-stages-container">
-          <p style="color:var(--ink-sub); font-size:.88rem;">Loading live roadmap milestones…</p>
-        </div>
-      </div>
-
-      <!-- PAGE 5: SCHEME NEWSROOM -->
-      <div id="page-newsroom" class="page-view">
-        <div style="background:var(--navy-dark); color:#fff; border-radius:16px; padding:26px 28px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
-          <div>
-            <div style="display:flex; align-items:center; gap:8px;">
-              <span class="eyebrow" style="color:var(--yellow-hero); font-weight:700;">POLICY & SCHEMES RADAR</span>
-              <span style="display:inline-flex; align-items:center; gap:5px; background:rgba(46, 104, 41, 0.35); border:1px solid #4ADE80; color:#86EFAC; font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:9999px;">
-                <span style="width:6px; height:6px; border-radius:50%; background:#4ADE80; display:inline-block;"></span>
-                LIVE GOVT FEED
-              </span>
-            </div>
-            <h2 style="font-size:1.8rem; margin-top:4px; color:#fff;">Live Government Schemes & Policy Newsroom</h2>
-            <p style="color:rgba(255,255,255,.8); margin-top:6px; font-size:.88rem;">Real-time notifications, equipment grants & RPL guidelines aggregated directly from official portals (PIB, MSDE, Skill India).</p>
-          </div>
-          <div style="display:flex; gap:10px; align-items:center;">
-            <button class="btn-navy-pill" id="btn-refresh-newsroom" onclick="refreshNewsroomData(true)" style="background:#FAF8F4; color:var(--navy-dark) !important; border:1px solid #E2DCD0; font-weight:600; padding:8px 16px; border-radius:8px; cursor:pointer;">
-              <span id="news-refresh-icon">↻</span> Fetch Latest Govt News
+            <button class="btn-navy-pill" style="width:100%; justify-content:center; padding:10px; font-size:0.84rem; margin-top:18px;" onclick="alert('Routing application to Gautam Buddha Nagar District Social Welfare Office! Dossier attached.')">
+              Submit Direct PM-AJAY Application →
             </button>
           </div>
+
+          <!-- Secondary Scheme: PM Vishwakarma -->
+          <div class="table-card" style="padding:22px 24px; border-top:4px solid var(--yellow-hero);">
+            <h3 style="font-size:1.15rem; margin-bottom:4px;">PM-Vishwakarma Scheme Linkage</h3>
+            <p style="font-size:0.82rem; color:var(--ink-sub); margin-bottom:16px;">Central Sector Scheme for Traditional Artisans and Craftspersons</p>
+
+            <div style="background:#FAF8F4; padding:14px; border-radius:10px; border:1px solid var(--border-light); margin-bottom:14px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="font-size:0.9rem; color:var(--navy-dark);">Toolkit E-Voucher</strong>
+                <span style="font-size:0.92rem; font-weight:800; color:var(--green-text);">₹15,000</span>
+              </div>
+              <p style="font-size:0.78rem; color:var(--ink-sub); margin:4px 0 0;">
+                Direct digital e-voucher for procurement of certified trade tools on basic skill verification.
+              </p>
+            </div>
+
+            <div style="background:#FAF8F4; padding:14px; border-radius:10px; border:1px solid var(--border-light); margin-bottom:16px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="font-size:0.9rem; color:var(--navy-dark);">Collateral-Free Credit</strong>
+                <span style="font-size:0.92rem; font-weight:800; color:var(--navy-dark);">₹1,00,000 @ 5%</span>
+              </div>
+              <p style="font-size:0.78rem; color:var(--ink-sub); margin:4px 0 0;">
+                First tranche loan at subsidized 5% interest rate with 8% subvention by MoMSME.
+              </p>
+            </div>
+
+            <button class="btn-ghost" style="width:100%; justify-content:center; padding:9px; font-size:0.82rem;" onclick="window.open('https://pmvishwakarma.gov.in/', '_blank')">
+              Visit PM Vishwakarma Portal ↗
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- SEPARATE PAGE 4: COMPETENCY & GAP CHECKLIST -->
+      <!-- ================================================================= -->
+      <div id="page-gaps" class="page-view">
+        <div style="background:#FFFFFF; border:1.5px solid var(--border-light); border-radius:16px; padding:24px 28px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <span class="eyebrow" style="color:var(--navy-dark); font-weight:700;">NSQF LEVEL 4 RADAR</span>
+            <h2 style="font-size:1.75rem; margin-top:2px;">Competency & Gap Checklist</h2>
+            <p style="color:var(--ink-sub); font-size:.88rem; margin-top:4px;">Comparison of your verified informal skills against national occupational standards.</p>
+          </div>
+          <span style="font-size:0.82rem; background:#FEF3C7; color:#92400E; padding:6px 14px; border-radius:8px; font-weight:700;">RPL Ready · 2 Gaps Identified</span>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+          
+          <!-- Column 1: Skills You Have -->
+          <div class="table-card" style="padding:22px 24px; border-top:4px solid var(--green-text);">
+            <div style="font-size:0.84rem; font-weight:800; color:var(--green-text); margin-bottom:12px; display:flex; align-items:center; gap:6px;">
+              <span>✓ VERIFIED COMPETENCIES (SKILLS YOU ALREADY HAVE)</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px;" id="competencies-have-list">
+              <div style="background:#F0FDF4; border:1px solid #BBF7D0; padding:10px 12px; border-radius:8px; font-size:0.84rem; color:#166534;">
+                <strong>✓ Machine Operation & Control:</strong> Skilled in operating single needle lockstitch industrial sewing machine.
+              </div>
+              <div style="background:#F0FDF4; border:1px solid #BBF7D0; padding:10px 12px; border-radius:8px; font-size:0.84rem; color:#166534;">
+                <strong>✓ Fabric Cutting & Pattern Layout:</strong> Able to cut garment components accurately matching seam allowances.
+              </div>
+              <div style="background:#F0FDF4; border:1px solid #BBF7D0; padding:10px 12px; border-radius:8px; font-size:0.84rem; color:#166534;">
+                <strong>✓ Alterations & Custom Tailoring:</strong> Over 5 years practical customer alteration experience.
+              </div>
+              <div style="background:#F0FDF4; border:1px solid #BBF7D0; padding:10px 12px; border-radius:8px; font-size:0.84rem; color:#166534;">
+                <strong>✓ Material Sourcing:</strong> Familiarity with local textile markets and hardware suppliers.
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 2: Competency Gaps to Certify -->
+          <div class="table-card" style="padding:22px 24px; border-top:4px solid #B45309;">
+            <div style="font-size:0.84rem; font-weight:800; color:#B45309; margin-bottom:12px; display:flex; align-items:center; gap:6px;">
+              <span>○ COMPETENCY GAPS (TO BE COVERED IN 12-HR RPL CAMP)</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px;" id="competencies-gap-list">
+              <div style="background:#FFFBEB; border:1px solid #FDE68A; padding:10px 12px; border-radius:8px; font-size:0.84rem; color:#92400E;">
+                <strong>○ Motorized Overlock Maintenance:</strong> Routine lubrication, thread tension tuning, and blade safety.
+              </div>
+              <div style="background:#FFFBEB; border:1px solid #FDE68A; padding:10px 12px; border-radius:8px; font-size:0.84rem; color:#92400E;">
+                <strong>○ Workplace Safety & Ergonomics:</strong> Needle guard protocols, posture alignment, and fire extinguisher use.
+              </div>
+              <div style="background:#FFFBEB; border:1px solid #FDE68A; padding:10px 12px; border-radius:8px; font-size:0.84rem; color:#92400E;">
+                <strong>○ Digital Payments & UPI Invoicing:</strong> Generating QR codes for customer payments and basic bookkeeping.
+              </div>
+            </div>
+
+            <div style="margin-top:20px; background:#FAF8F4; padding:12px; border-radius:8px; border:1px solid var(--border-light); font-size:0.78rem; color:var(--ink-sub);">
+              💡 <em>These 3 gap modules are taught directly during the 12-hour orientation camp before assessment.</em>
+            </div>
+            
+            <button class="btn-navy-pill" style="width:100%; justify-content:center; padding:9px; font-size:0.82rem; margin-top:14px;" onclick="showPage('rpl')">
+              Enroll for 12-Hr RPL Orientation →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- SEPARATE PAGE 5: RPL CERTIFICATION -->
+      <!-- ================================================================= -->
+      <div id="page-rpl" class="page-view">
+        <div style="background:#FFFFFF; border:1.5px solid var(--border-light); border-radius:16px; padding:24px 28px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <span class="eyebrow" style="color:var(--navy-dark); font-weight:700;">PMKVY 4.0 RECOGNITION OF PRIOR LEARNING</span>
+            <h2 style="font-size:1.75rem; margin-top:2px;">RPL Certification Camp</h2>
+            <p style="color:var(--ink-sub); font-size:.88rem; margin-top:4px;">Formal national certification of your hands-on trade skills without prolonged classroom study.</p>
+          </div>
+          <span style="font-size:0.82rem; background:#DCFCE7; color:#15803D; padding:6px 14px; border-radius:8px; font-weight:700;">100% Free · ₹500 DBT Direct</span>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+          
+          <div class="table-card" style="padding:24px;">
+            <h3 style="font-size:1.15rem; margin-bottom:12px;">Camp Structure & Deliverables</h3>
+            
+            <div style="display:flex; flex-direction:column; gap:12px; font-size:0.84rem;">
+              <div style="display:flex; gap:12px; align-items:flex-start;">
+                <span style="font-size:1.3rem;">⏱️</span>
+                <div>
+                  <strong>12-Hour Orientation:</strong>
+                  <div style="color:var(--ink-sub); font-size:0.78rem;">Hands-on brush up on modern tool handling, safety, and digital transactions.</div>
+                </div>
+              </div>
+
+              <div style="display:flex; gap:12px; align-items:flex-start;">
+                <span style="font-size:1.3rem;">📱</span>
+                <div>
+                  <strong>Skill India Digital QR Certificate:</strong>
+                  <div style="color:var(--ink-sub); font-size:0.78rem;">Verifiable digital badge linked to your DigiLocker and national portal.</div>
+                </div>
+              </div>
+
+              <div style="display:flex; gap:12px; align-items:flex-start;">
+                <span style="font-size:1.3rem;">💰</span>
+                <div>
+                  <strong>₹500 Direct Benefit Transfer:</strong>
+                  <div style="color:var(--ink-sub); font-size:0.78rem;">Government stipend transferred directly into your Aadhaar-seeded bank account upon assessment completion.</div>
+                </div>
+              </div>
+
+              <div style="display:flex; gap:12px; align-items:flex-start;">
+                <span style="font-size:1.3rem;">🛡️</span>
+                <div>
+                  <strong>Accident Insurance Cover:</strong>
+                  <div style="color:var(--ink-sub); font-size:0.78rem;">3 years of free accidental insurance cover under Pradhan Mantri Suraksha Bima Yojana.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-card" style="padding:24px; border:2px solid var(--navy-dark);">
+            <span class="eyebrow" style="color:var(--navy-dark); font-weight:700;">DISTRICT TRAINING PARTNER</span>
+            <h3 style="font-size:1.2rem; margin:4px 0 10px;">Pradhan Mantri Kaushal Kendra (PMKK)</h3>
+            
+            <div style="background:#FAF8F4; padding:14px; border-radius:10px; border:1px solid var(--border-light); font-size:0.82rem; margin-bottom:16px;">
+              <div>🏢 <strong>Centre Name:</strong> PMKK Noida District Centre</div>
+              <div style="margin-top:4px;">📍 <strong>Address:</strong> C-56/12, Sector 62, Noida, Gautam Buddha Nagar, UP 201309</div>
+              <div style="margin-top:4px;">📞 <strong>Nodal Helpdesk:</strong> 0120-2400XXX / +91-9876543210</div>
+              <div style="margin-top:4px;">📅 <strong>Next Batch:</strong> Every Tuesday & Thursday (10:00 AM)</div>
+            </div>
+
+            <button class="btn-yellow-pill" style="width:100%; justify-content:center; padding:10px; font-size:0.86rem;" onclick="alert('Seat reserved for next Tuesday orientation camp at Sector 62 PMKK! SMS confirmation dispatched.')">
+              Book Seat for Next Camp →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- SEPARATE PAGE 6: MICRO-ENTERPRISE PLAN (DYNAMIC GRANT CALCULATOR) -->
+      <!-- ================================================================= -->
+      <div id="page-enterprise" class="page-view">
+        <div style="background:#FFFFFF; border:1.5px solid var(--border-light); border-radius:16px; padding:24px 28px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <span class="eyebrow" style="color:#B45309; font-weight:700;">DETAILED PROJECT REPORT (DPR) & FINANCIALS</span>
+            <h2 style="font-size:1.75rem; margin-top:2px;">Micro-Enterprise Plan & PM-AJAY Grant Calculator</h2>
+            <p style="color:var(--ink-sub); font-size:.88rem; margin-top:4px;">Interactive statutory formula calculator for PM-AJAY 50% capital subsidy and NSFDC concessional loans.</p>
+          </div>
+          <button class="btn-yellow-pill" onclick="openActionCardModal()" style="padding:8px 14px; font-size:0.8rem;">
+            📋 Print Action Card
+          </button>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:24px;">
+          
+          <!-- Left: Interactive Sliders & Inputs -->
+          <div class="table-card" style="padding:24px; border:2px solid var(--navy-dark);">
+            <span class="eyebrow" style="color:var(--navy-dark); font-weight:700;">DYNAMIC STATUTORY SIMULATOR</span>
+            <h3 style="font-size:1.25rem; margin:4px 0 16px;">Configure Your Enterprise Project Cost</h3>
+
+            <!-- Slider 1: Project Setup Cost -->
+            <div style="margin-bottom:20px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <label for="calc-project-cost" style="font-size:0.84rem; font-weight:700; color:var(--navy-dark);">Total Equipment & Project Cost:</label>
+                <span id="display-project-cost" style="font-size:1.15rem; font-weight:800; color:var(--navy-dark);">₹65,000</span>
+              </div>
+              <input type="range" id="calc-project-cost" class="calc-slider" min="20000" max="150000" step="5000" value="65000" oninput="recalculateGrant()" />
+              <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:var(--ink-sub);">
+                <span>₹20,000 (Basic)</span>
+                <span>₹65,000 (Standard DPR)</span>
+                <span>₹1,50,000 (Advanced)</span>
+              </div>
+            </div>
+
+            <!-- Slider 2: Annual Family Income -->
+            <div style="margin-bottom:20px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <label for="calc-family-income" style="font-size:0.84rem; font-weight:700; color:var(--navy-dark);">Beneficiary Annual Family Income:</label>
+                <span id="display-family-income" style="font-size:1.15rem; font-weight:800; color:#B45309;">₹1,20,000</span>
+              </div>
+              <input type="range" id="calc-family-income" class="calc-slider" min="50000" max="350000" step="10000" value="120000" oninput="recalculateGrant()" />
+              <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:var(--ink-sub);">
+                <span>₹50,000 (BPL)</span>
+                <span>₹2,50,000 (PM-AJAY Ceiling)</span>
+                <span>₹3,50,000</span>
+              </div>
+            </div>
+
+            <!-- Income Ceiling Validator Alert -->
+            <div id="income-ceiling-alert" style="background:#F0FDF4; border:1px solid #BBF7D0; border-radius:8px; padding:10px 12px; font-size:0.78rem; color:#166534; margin-bottom:18px;">
+              ✅ <strong>Statutory Income Check Passed:</strong> Family income is within the PM-AJAY GIA statutory ceiling (≤ ₹2.50 Lakh/year).
+            </div>
+
+            <div style="background:#FAF8F4; padding:12px; border-radius:8px; border:1px solid var(--border-light); font-size:0.78rem; color:var(--ink-sub); line-height:1.45;">
+              ⚖️ <strong>Statutory Rule (PM-AJAY GIA Sec 4.2):</strong> Government capital grant pays <strong>50% of the project cost</strong> up to an absolute ceiling of <strong>₹50,000</strong>. Balance is funded via NSFDC concessional loans @ 6.0% interest.
+            </div>
+          </div>
+
+          <!-- Right: Real-time Calculated Financial Results -->
+          <div class="table-card" style="padding:24px; border:2px solid #10B981; background:#FAFCFB;">
+            <span class="eyebrow" style="color:#059669; font-weight:700;">CALCULATED BENEFIT BREAKDOWN</span>
+            <h3 style="font-size:1.25rem; margin:4px 0 16px;">Government Grant & Funding Split</h3>
+
+            <!-- 1. 100% Non-Repayable Grant -->
+            <div style="background:#DCFCE7; border:1.5px solid #86EFAC; border-radius:12px; padding:16px; margin-bottom:14px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <strong style="font-size:0.92rem; color:#14532D; display:block;">1. PM-AJAY Capital Grant (Free)</strong>
+                  <span style="font-size:0.75rem; color:#166534;">100% Non-Repayable Government Grant</span>
+                </div>
+                <span id="result-subsidy-amount" style="font-size:1.6rem; font-weight:800; color:#15803D;">₹32,500</span>
+              </div>
+            </div>
+
+            <!-- 2. Balance NSFDC Concessional Loan -->
+            <div style="background:#FFFFFF; border:1.5px solid var(--border-light); border-radius:12px; padding:16px; margin-bottom:14px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <strong style="font-size:0.92rem; color:var(--navy-dark); display:block;">2. NSFDC Concessional Term Loan</strong>
+                  <span style="font-size:0.75rem; color:var(--ink-sub);">Remaining balance at 6.0% interest p.a.</span>
+                </div>
+                <span id="result-loan-amount" style="font-size:1.4rem; font-weight:800; color:var(--navy-dark);">₹32,500</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:0.76rem; color:var(--ink-sub); margin-top:8px; border-top:1px dashed #E2E8F0; padding-top:6px;">
+                <span>Estimated Monthly EMI (36 Mos): <strong id="result-emi-val" style="color:var(--navy-dark);">₹988 / mo</strong></span>
+                <span style="color:#059669; font-weight:700;">Interest Saved: ₹7,450 vs Banks</span>
+              </div>
+            </div>
+
+            <!-- 3. Target Earning Projection -->
+            <div style="background:#FAF8F4; border:1px solid var(--border-light); border-radius:10px; padding:12px 14px; margin-bottom:18px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:0.82rem; color:var(--ink-sub);">Estimated Monthly Net Earning:</span>
+                <strong id="result-income-projection" style="font-size:0.95rem; color:var(--green-text);">₹18,000 – ₹24,000 / mo</strong>
+              </div>
+            </div>
+
+            <button class="btn-yellow-pill" style="width:100%; justify-content:center; padding:11px; font-size:0.88rem;" onclick="openActionCardModal()">
+              Generate Official Action Card (ASCII Receipt) →
+            </button>
+          </div>
+        </div>
+
+        <!-- DPR Equipment & Machinery Breakdown -->
+        <div class="table-card" style="padding:22px 24px;">
+          <h4 style="font-size:1.1rem; margin-bottom:8px;" id="dpr-breakdown-heading">Standard Equipment Package for this Trade</h4>
+          <p style="font-size:0.82rem; color:var(--ink-sub); margin-bottom:14px;">The following equipment is certified under District Social Welfare procurement guidelines:</p>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px;" id="dpr-equipment-grid">
+            <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:10px 12px; font-size:0.82rem;">
+              <strong>1. Industrial Motorized Machine</strong>
+              <div style="color:var(--ink-sub); font-size:0.74rem;">Direct drive servo motor with auto-trim</div>
+            </div>
+            <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:10px 12px; font-size:0.82rem;">
+              <strong>2. Heavy-duty Cutting Table</strong>
+              <div style="color:var(--ink-sub); font-size:0.74rem;">Laminated surface with pattern markings</div>
+            </div>
+            <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:10px 12px; font-size:0.82rem;">
+              <strong>3. Steam Iron & Vacuum Board</strong>
+              <div style="color:var(--ink-sub); font-size:0.74rem;">High pressure pressing unit for finishing</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- SEPARATE PAGE 7: GRANT DOCUMENT CHECKLIST (LIVE CITIZEN DOSSIER) -->
+      <!-- ================================================================= -->
+      <div id="page-dossier" class="page-view">
+        <div style="background:#FFFFFF; border:1.5px solid var(--border-light); border-radius:16px; padding:24px 28px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <span class="eyebrow" style="color:var(--navy-dark); font-weight:700;">CITIZEN DOSSIER & OCR ENGINE</span>
+            <h2 style="font-size:1.75rem; margin-top:2px;">Grant Document Checklist</h2>
+            <p style="color:var(--ink-sub); font-size:.88rem; margin-top:4px;">Mandatory 4-document verification matrix powered by LlamaParse OCR and Supabase storage.</p>
+          </div>
+          <span style="font-size:0.82rem; background:#DCFCE7; color:#15803D; padding:6px 14px; border-radius:8px; font-weight:700;">Dossier Status: 4 of 4 Verified (100%)</span>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:14px; margin-bottom:24px;">
+          
+          <!-- Doc 1: Aadhaar -->
+          <div class="dossier-card">
+            <div style="display:flex; align-items:center; gap:16px;">
+              <div style="width:44px; height:44px; border-radius:10px; background:#EFF6FF; color:#1E40AF; display:flex; align-items:center; justify-content:center; font-size:1.3rem;">
+                🪪
+              </div>
+              <div>
+                <strong style="font-size:0.95rem; color:var(--navy-dark);">1. Aadhaar Card (Mobile Linked)</strong>
+                <div style="font-size:0.78rem; color:var(--ink-sub); margin-top:2px;">UIDAI Verified · Aadhaar No: XXXX-XXXX-4819 · Name: Sunita Devi</div>
+                <div style="font-size:0.72rem; color:#15803D; margin-top:2px;">LlamaParse OCR Confidence: 99.4% · DigiLocker Seeded</div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span class="dossier-status-pill verified">VERIFIED ✓</span>
+              <button class="btn-ghost" style="padding:6px 12px; font-size:0.76rem;" onclick="inspectOcrDoc('aadhaar')">Inspect OCR Data</button>
+            </div>
+          </div>
+
+          <!-- Doc 2: SC Caste Certificate -->
+          <div class="dossier-card">
+            <div style="display:flex; align-items:center; gap:16px;">
+              <div style="width:44px; height:44px; border-radius:10px; background:#FEF3C7; color:#92400E; display:flex; align-items:center; justify-content:center; font-size:1.3rem;">
+                📜
+              </div>
+              <div>
+                <strong style="font-size:0.95rem; color:var(--navy-dark);">2. Scheduled Caste (SC) Community Certificate</strong>
+                <div style="font-size:0.78rem; color:var(--ink-sub); margin-top:2px;">Tehsildar Gautam Buddha Nagar · Cert No: UP-SC-2023-884192</div>
+                <div style="font-size:0.72rem; color:#15803D; margin-top:2px;">LlamaParse OCR Confidence: 98.7% · Match: Scheduled Caste (SC)</div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span class="dossier-status-pill verified">VERIFIED ✓</span>
+              <button class="btn-ghost" style="padding:6px 12px; font-size:0.76rem;" onclick="inspectOcrDoc('caste')">Inspect OCR Data</button>
+            </div>
+          </div>
+
+          <!-- Doc 3: Income Certificate / Ration Card -->
+          <div class="dossier-card">
+            <div style="display:flex; align-items:center; gap:16px;">
+              <div style="width:44px; height:44px; border-radius:10px; background:#F0FDF4; color:#166534; display:flex; align-items:center; justify-content:center; font-size:1.3rem;">
+                💵
+              </div>
+              <div>
+                <strong style="font-size:0.95rem; color:var(--navy-dark);">3. Annual Family Income Certificate</strong>
+                <div style="font-size:0.78rem; color:var(--ink-sub); margin-top:2px;">Revenue Department UP · Annual Income: ₹1,20,000 (≤ ₹2.50L ceiling)</div>
+                <div style="font-size:0.72rem; color:#15803D; margin-top:2px;">LlamaParse OCR Confidence: 97.9% · Valid till March 2027</div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span class="dossier-status-pill verified">VERIFIED ✓</span>
+              <button class="btn-ghost" style="padding:6px 12px; font-size:0.76rem;" onclick="inspectOcrDoc('income')">Inspect OCR Data</button>
+            </div>
+          </div>
+
+          <!-- Doc 4: Bank Passbook -->
+          <div class="dossier-card">
+            <div style="display:flex; align-items:center; gap:16px;">
+              <div style="width:44px; height:44px; border-radius:10px; background:#EDE9FE; color:#5B21B6; display:flex; align-items:center; justify-content:center; font-size:1.3rem;">
+                🏦
+              </div>
+              <div>
+                <strong style="font-size:0.95rem; color:var(--navy-dark);">4. Bank Passbook (Aadhaar DBT Enabled)</strong>
+                <div style="font-size:0.78rem; color:var(--ink-sub); margin-top:2px;">State Bank of India · A/c: 3829XXXX710 · NPCI Aadhaar Mapping: ACTIVE</div>
+                <div style="font-size:0.72rem; color:#15803D; margin-top:2px;">LlamaParse OCR Confidence: 98.4% · Direct Credit Ready</div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span class="dossier-status-pill verified">VERIFIED ✓</span>
+              <button class="btn-ghost" style="padding:6px 12px; font-size:0.76rem;" onclick="inspectOcrDoc('bank')">Inspect OCR Data</button>
+            </div>
+          </div>
+
+        </div>
+
+        <div style="display:flex; gap:12px;">
+          <button class="btn-yellow-pill" style="padding:10px 20px; font-size:0.86rem;" onclick="alert('Dossier package successfully verified against Supabase user_documents! Submitting directly to District Nodal Officer.')">
+            Transmit Verified Dossier Package →
+          </button>
+          <button class="btn-ghost" style="padding:10px 18px; font-size:0.86rem;" onclick="openActionCardModal()">
+            Download Action Card (Receipt)
+          </button>
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- SEPARATE PAGE 8: SCHEME NEWSROOM -->
+      <!-- ================================================================= -->
+      <div id="page-newsroom" class="page-view">
+        <div style="background:var(--yellow-hero); border:1.5px solid var(--border-light); border-radius:16px; padding:24px 28px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <span class="eyebrow" style="color:var(--navy-dark); font-weight:700;">REAL-TIME GAZETTE & PORTAL AGGREGATOR</span>
+            <h2 style="font-size:1.8rem; margin-top:4px; color:var(--navy-dark);">Scheme & Livelihood Newsroom</h2>
+            <p style="color:#3A4763; font-size:.88rem; margin-top:4px;">Live updates from Ministry of Social Justice & Empowerment, MSDE, and District Welfare portals.</p>
+          </div>
+          <button class="btn-navy-pill" onclick="refreshNewsroomData(true)" style="padding:8px 16px; font-size:0.82rem;">↻ Refresh Gazette Feed</button>
+        </div>
+
+        <!-- Filter Chips -->
+        <div style="display:flex; gap:8px; margin-bottom:16px;">
+          <button class="btn-ghost active" style="font-size:0.78rem; padding:5px 12px; background:var(--navy-dark); color:#fff;">All Updates</button>
+          <button class="btn-ghost" style="font-size:0.78rem; padding:5px 12px;" onclick="alert('Filtered: PM-AJAY GIA updates')">PM-AJAY Capital Grants</button>
+          <button class="btn-ghost" style="font-size:0.78rem; padding:5px 12px;" onclick="alert('Filtered: RPL camp dates')">RPL Camp Schedules</button>
+          <button class="btn-ghost" style="font-size:0.78rem; padding:5px 12px;" onclick="alert('Filtered: PM Vishwakarma vouchers')">PM Vishwakarma Vouchers</button>
         </div>
 
         <div id="newsroom-list-container">
-          <p style="color:var(--ink-sub); font-size:.88rem;">Connecting to official government news desk…</p>
+          <!-- Populated by JS -->
         </div>
       </div>
 
-      <!-- PAGE 6: BOT ASSISTANT (TELEGRAM / WHATSAPP SIMULATOR) -->
-      <div id="page-telegram" class="page-view">
-        <div style="background:#DCEBFA; border:1.5px solid var(--blue-text); border-radius:16px; padding:24px 28px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;" id="bot-header-banner">
+      <!-- ================================================================= -->
+      <!-- SEPARATE PAGE 9: BOT ASSISTANT (WHATSAPP & TELEGRAM) -->
+      <!-- ================================================================= -->
+      <div id="page-bot" class="page-view">
+        <div id="bot-header-banner" style="background:#E2F7EB; border:1.5px solid #25D366; border-radius:16px; padding:20px 24px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
           <div>
-            <span class="eyebrow" style="color:var(--blue-text);">MULTILINGUAL AI ASSISTANT</span>
-            <h2 style="font-size:1.8rem; margin-top:4px;" id="bot-channel-title">AI Skill Bot Hub (WhatsApp & Telegram)</h2>
-            <p style="color:#3A4763; margin-top:6px; font-size:.9rem;">Voice and text consultation powered by Sarvam AI & Pinecone RAG — fully synced to this workspace.</p>
+            <span class="eyebrow" style="color:#075E54; font-weight:700;">DUAL OMNICHANNEL LIVELIHOOD BOT</span>
+            <h2 style="font-size:1.6rem; margin-top:2px; color:var(--navy-dark);">Official Voice & Text AI Assistant</h2>
+            <p style="color:var(--ink-sub); font-size:.86rem; margin-top:2px;">Chat in Hindi, English or regional voice dialects with your PM-AJAY and RPL guide.</p>
           </div>
-          <img src="images/cat_bot.jpg" alt="Bot Mascot" style="width:90px; height:90px; object-fit:cover; border-radius:50%; border:2px solid var(--navy-dark);">
-        </div>
-
-        <div class="tg-shell" id="bot-shell">
-          <div class="tg-header" id="bot-shell-header">
-            <div class="tg-header-left">
-              <img src="images/cat_bot.jpg" alt="Avatar" class="tg-avatar-img">
-              <div>
-                <h5 style="font-size:.92rem; font-weight:700;" id="bot-status-name">WhatsApp AI Bot (+1-555-203-7186)</h5>
-                <span style="font-size:.72rem; color:var(--green-text); font-weight:600;" id="bot-status-indicator">● Online · Meta Cloud API & n8n Live</span>
-              </div>
-            </div>
-            <div style="display:flex; gap:6px;">
-              <span style="font-size:.74rem; background:#fff; border:1px solid var(--border-light); padding:3px 10px; border-radius:12px; font-family:var(--font-mono);">RAG v3.2</span>
-            </div>
-          </div>
-
-          <div class="tg-body" id="tg-chat-body">
-            <div class="tg-msg bot">Namaste 🙏 Tell me about a skill or trade you practice — even informally — and I will map it to an official NSQF code and government grant!</div>
-            <div class="tg-msg user">I've been fixing two-wheelers for 6 years, no certificate.</div>
-            <div class="tg-msg bot">That maps closely to <strong>NSQF Level 4 — Two &amp; Three Wheeler Service Technician (ASC/Q1401)</strong>. You qualify for fast-track <strong>Recognition of Prior Learning (RPL)</strong> and tool incentives!</div>
-          </div>
-
-          <div class="tg-input-bar">
-            <input id="tg-user-input" placeholder="Type or speak your skill (e.g., 'Mujhe silai aati hai, machine grant chahiye')…" onkeypress="handleTgInputKey(event)">
-            
-            <!-- Language Selector for Voice Assistant -->
-            <div id="tg-lang-toggle" style="display:inline-flex; background:#EAE6DF; border-radius:8px; padding:2px; font-size:.74rem; font-weight:700; border:1px solid var(--border-light); margin-right:4px;">
-              <button id="lang-btn-hi" type="button" onclick="setVoiceLanguage('hi-IN')" style="border:none; background:#162035; color:#fff; padding:4px 8px; border-radius:6px; cursor:pointer;" title="हिंदी / Hinglish Voice Input">🇮🇳 HI</button>
-              <button id="lang-btn-en" type="button" onclick="setVoiceLanguage('en-IN')" style="border:none; background:transparent; color:#5C564A; padding:4px 8px; border-radius:6px; cursor:pointer;" title="English Voice Input">🇬🇧 EN</button>
-            </div>
-
-            <button id="tg-mic-btn" type="button" class="btn-ghost" onclick="toggleVoiceInput()" title="Voice Recording Input (Auto Detect Hindi/English)" style="padding:8px 12px; display:inline-flex; align-items:center; justify-content:center; border-radius:8px; border:1px solid var(--border-light);">
-              <svg id="tg-mic-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          
+          <div style="display:flex; gap:8px;">
+            <button id="btn-bot-wa" class="btn-ghost active" style="background:#25D366; color:#fff; border-color:#25D366; padding:7px 14px; font-size:0.8rem; font-weight:700;" onclick="switchBotChannel('whatsapp')">
+              WhatsApp (+1-555-203-7186)
             </button>
-            <button class="btn-navy-pill" onclick="const input = document.getElementById('tg-user-input'); if (input.value.trim()) { sendTgUserMessage(input.value.trim()); input.value = ''; }">Send</button>
-          </div>
-
-          <div class="tg-quick-replies">
-            <button onclick="tgReply(this)">Mujhe silai aati hai, machine grant chahiye</button>
-            <button onclick="tgReply(this)">Start RPL technician certification</button>
-            <button onclick="tgReply(this)">Find district skill assessment camp</button>
+            <button id="btn-bot-tg" class="btn-ghost" style="background:#FFFFFF; color:#229ED9; border-color:#229ED9; padding:7px 14px; font-size:0.8rem; font-weight:700;" onclick="switchBotChannel('telegram')">
+              Telegram (@projectkarman)
+            </button>
           </div>
         </div>
-      </div>
 
-      <!-- PAGE 7: RESUME BUILDER -->
-      <div id="page-builder" class="page-view">
-        <div style="background:#fff; border:1.5px solid var(--border-light); border-radius:16px; padding:28px; margin-bottom:24px;">
-          <span class="eyebrow" style="color:var(--navy-dark);">SKILL RESUME BUILDER</span>
-          <h2 style="font-size:1.8rem; margin-top:4px;">Generate an NSQF-Certified Skill Pass</h2>
-          <p style="color:var(--ink-sub); margin-top:6px; font-size:.9rem;">Connected to the backend PDF Generator — creates verifiable resumes with QP Codes and Grant Eligibility.</p>
-        </div>
-
-        <div class="builder-layout">
-          <div class="builder-form-card">
-            <span class="eyebrow" style="font-weight:700; display:block; margin-bottom:14px;">BENEFICIARY DETAILS</span>
-            
-            <div style="margin-bottom:12px;">
-              <label style="font-size:.78rem; font-weight:600; display:block; margin-bottom:4px;">Full Name</label>
-              <input class="field-input" id="builder-name" value="Sunita Devi">
-            </div>
-
-            <div style="margin-bottom:12px;">
-              <label style="font-size:.78rem; font-weight:600; display:block; margin-bottom:4px;">Phone Number</label>
-              <input class="field-input" id="builder-phone" value="919876543210">
-            </div>
-
-            <div style="margin-bottom:12px;">
-              <label style="font-size:.78rem; font-weight:600; display:block; margin-bottom:4px;">District & State</label>
-              <input class="field-input" id="builder-district" value="G.B. Nagar, Uttar Pradesh">
-            </div>
-
-            <div style="margin-bottom:12px;">
-              <label style="font-size:.78rem; font-weight:600; display:block; margin-bottom:4px;">Trade / Skill Specialization</label>
-              <select class="select-fake" id="builder-trade" style="width:100%;">
-                <option value="Tailoring & Sewing Machine Operator">Tailoring & Sewing Machine Operator (AMH/Q0301)</option>
-                <option value="Two Wheeler Service Technician">Two Wheeler Service Technician (ASC/Q1401)</option>
-                <option value="Solar PV Installer Technician">Solar PV Installer Technician (SGJ/Q0101)</option>
-              </select>
-            </div>
-
-            <div style="margin-bottom:12px;">
-              <label style="font-size:.78rem; font-weight:600; display:block; margin-bottom:4px;">Years of Practical Experience</label>
-              <input class="field-input" id="builder-exp" value="5 Years (Informal Trade)">
-            </div>
-
-            <div style="margin-bottom:18px;">
-              <label style="font-size:.78rem; font-weight:600; display:block; margin-bottom:4px;">Tools Owned</label>
-              <input class="field-input" id="builder-tools" value="Motorized Sewing Kit, Scissors">
-            </div>
-
-            <button class="btn-navy-pill" id="btn-export-resume" style="width:100%; justify-content:center; padding:12px;" onclick="exportResumePdf()">Export as Certified PDF →</button>
-          </div>
-
-          <div>
-            <span class="eyebrow" style="font-weight:700; display:block; margin-bottom:14px;">LIVE PREVIEW</span>
-            <div class="builder-preview">
-              <h3 id="pv-name">Sunita Devi</h3>
-              <span style="font-size:.76rem; color:var(--blue-text); font-weight:700;">NSQF Level 4 · Certified Artisan</span>
-              <div style="font-size:.74rem; color:var(--green-text); font-weight:600; margin-top:2px;">Linked to PM-AJAY Micro-Enterprise Grant (₹50,000)</div>
-              
-              <div class="pv-line" style="margin-top:16px;"></div>
-              <div class="pv-line short"></div>
-              
-              <div style="background:#FAF8F4; border:1px solid var(--border-light); border-radius:8px; padding:12px; margin-top:18px;">
-                <strong style="font-size:.8rem; display:block; margin-bottom:4px;">Qualification Pack Standards:</strong>
-                <div style="font-size:.76rem; color:var(--ink-sub);">• Single needle lockstitch operation</div>
-                <div style="font-size:.76rem; color:var(--ink-sub);">• Garment defect identification & audit</div>
-                <div style="font-size:.76rem; color:var(--ink-sub);">• Motorized maintenance & workshop safety</div>
+        <!-- Chat Container -->
+        <div class="tg-workspace-layout" style="display:grid; grid-template-columns:1fr; max-width:820px; margin:0 auto;">
+          <div class="tg-phone-mockup" style="box-shadow:0 4px 20px rgba(0,0,0,0.08); border-radius:14px; overflow:hidden; border:1.5px solid var(--border-light);">
+            <div class="tg-header wa" id="bot-shell-header" style="background:#075E54; color:#fff; padding:12px 18px; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <strong style="font-size:0.95rem; display:block;" id="bot-status-name">WhatsApp AI Bot (+1-555-203-7186)</strong>
+                <span style="font-size:0.72rem; color:#A7F3D0;" id="bot-status-indicator">● Online · Meta WhatsApp Cloud API Live</span>
               </div>
+              <span style="font-size:0.74rem; background:rgba(255,255,255,0.15); padding:3px 8px; border-radius:4px;">PM-AJAY Node</span>
+            </div>
 
-              <div class="pv-line" style="margin-top:16px;"></div>
-              <div class="pv-line short"></div>
+            <div class="tg-chat-body" id="tg-chat-body" style="height:360px; overflow-y:auto; padding:18px; background:#E5DDD5; display:flex; flex-direction:column; gap:10px;">
+              <div class="tg-msg bot" style="background:#FFFFFF; padding:10px 14px; border-radius:8px; max-width:80%; font-size:0.84rem; line-height:1.45; box-shadow:0 1px 2px rgba(0,0,0,0.1);">
+                Namaste! 🙏 I am your KARMAN Livelihood Assistant. I can identify your trade from practical experience, calculate your PM-AJAY capital grant (up to ₹50,000), and find the nearest RPL certification camp in Gautam Buddha Nagar. How can I help you today?
+              </div>
+            </div>
+
+            <div style="padding:10px 16px; background:#F0F2F5; border-top:1px solid #E2E8F0; display:flex; gap:6px; flex-wrap:wrap;">
+              <button class="tg-quick-reply" onclick="tgReply(this)">Calculate my PM-AJAY grant</button>
+              <button class="tg-quick-reply" onclick="tgReply(this)">When is the next RPL camp?</button>
+              <button class="tg-quick-reply" onclick="tgReply(this)">Check my documents checklist</button>
+            </div>
+
+            <div class="tg-input-bar" style="display:flex; padding:10px 14px; background:#FFFFFF; border-top:1px solid #E2E8F0; gap:8px;">
+              <input type="text" id="tg-user-input" placeholder="Type your trade or question in Hindi / English..." style="flex:1; border:1px solid #CBD5E1; border-radius:20px; padding:8px 16px; font-size:0.84rem; outline:none;" onkeypress="handleTgInputKey(event)">
+              <button class="btn-navy-pill" onclick="handleTgSendBtn()" style="padding:8px 16px; font-size:0.8rem;">Send</button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- PAGE 8: SETTINGS -->
+      <!-- ================================================================= -->
+      <!-- SETTINGS PAGE -->
+      <!-- ================================================================= -->
       <div id="page-settings" class="page-view">
         <div style="background:#fff; border:1.5px solid var(--border-light); border-radius:16px; padding:28px; margin-bottom:24px;">
-          <span class="eyebrow" style="color:var(--navy-dark);">SETTINGS</span>
-          <h2 style="font-size:1.8rem; margin-top:4px;">Account Settings</h2>
-          <p style="color:var(--ink-sub); margin-top:6px; font-size:.9rem;">Manage your profile, notification triggers and connected channels.</p>
+          <span class="eyebrow" style="color:var(--navy-dark);">SETTINGS & PROFILE</span>
+          <h2 style="font-size:1.8rem; margin-top:4px;">Beneficiary Account Settings</h2>
+          <p style="color:var(--ink-sub); margin-top:6px; font-size:.9rem;">Manage your beneficiary profile, district linkage, and notification preferences.</p>
         </div>
 
         <div class="settings-grid" style="margin-bottom:20px;">
           <div class="settings-row">
-            <div class="meta"><strong>Full Name</strong><span>Shown on your resume and roadmap ticket</span></div>
-            <input class="field-input" id="setting-full-name" style="max-width:220px;" value="Arjun Mehta" onchange="saveLiveUserProfile({ full_name: this.value });">
+            <div class="meta"><strong>Full Name</strong><span>Shown on your NSQF passport and DPR application</span></div>
+            <input class="field-input" id="setting-full-name" style="max-width:240px;" value="Sunita Devi">
           </div>
           <div class="settings-row">
-            <div class="meta"><strong>Target Career Role</strong><span>Drives your readiness score and roadmap</span></div>
-            <select class="select-fake" style="max-width:220px;" onchange="changeRole(this.value); saveLiveUserProfile({ target_trade: this.value });">
-              <option value="AI / ML Engineer">AI / ML Engineer</option>
-              <option value="Full-Stack Developer">Full-Stack Developer</option>
-              <option value="Data Engineer">Data Engineer</option>
+            <div class="meta"><strong>Home District</strong><span>Used to route grants to District Social Welfare Officer</span></div>
+            <input class="field-input" id="setting-district" style="max-width:240px;" value="Gautam Buddha Nagar, UP">
+          </div>
+          <div class="settings-row">
+            <div class="meta"><strong>Identified Trade Role</strong><span>Primary NSQF occupational qualification</span></div>
+            <select class="select-fake" style="max-width:240px;" id="setting-trade-select" onchange="applyNsqfTrade(this.value)">
+              <option value="AMH/Q1947">Tailoring & Garments (AMH/Q1947)</option>
+              <option value="CSC/Q0204">Welding & Fabrication (CSC/Q0204)</option>
+              <option value="ELE/Q6301">Electrical & Wireman (ELE/Q6301)</option>
+              <option value="SGJ/Q0101">Solar Tech Surya Mitra (SGJ/Q0101)</option>
+              <option value="PSC/Q0104">Plumbing (PSC/Q0104)</option>
+              <option value="ASC/Q9703">Commercial Driving (ASC/Q9703)</option>
+              <option value="SSC/Q2212">Data Entry Operator (SSC/Q2212)</option>
+              <option value="AGR/Q4101">Dairy Specialist (AGR/Q4101)</option>
+              <option value="ELE/Q4601">Mobile Phone Hardware Repair (ELE/Q4601)</option>
             </select>
-          </div>
-        </div>
-
-        <span class="eyebrow" style="font-weight:700; display:block; margin-bottom:10px;">NOTIFICATIONS & SYNC</span>
-        <div class="settings-grid">
-          <div class="settings-row">
-            <div class="meta"><strong>Roadmap Milestone Alerts</strong><span>Get notified when a new stage unlocks</span></div>
-            <button class="toggle on" onclick="this.classList.toggle('on')" aria-label="Toggle roadmap alerts"></button>
-          </div>
-          <div class="settings-row">
-            <div class="meta"><strong>Scheme Newsroom Digest</strong><span>Weekly summary of new grants & guidelines</span></div>
-            <button class="toggle on" onclick="this.classList.toggle('on')" aria-label="Toggle newsroom digest"></button>
-          </div>
-          <div class="settings-row">
-            <div class="meta"><strong>Bot Assistant Channel Sync</strong><span>Mirror bot conversations directly into this dashboard</span></div>
-            <button class="toggle on" onclick="this.classList.toggle('on')" aria-label="Toggle Bot sync"></button>
           </div>
         </div>
       </div>
 
     </main>
+  </div>
+</div>
 
+<!-- ================================================================= -->
+<!-- MODAL 1: MONOSPACED OFFICIAL ACTION CARD MODAL -->
+<!-- ================================================================= -->
+<div class="k-modal-backdrop" id="action-card-modal">
+  <div class="k-modal-dialog">
+    <button class="k-modal-close" onclick="closeActionCardModal()">✕</button>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+      <div>
+        <span class="eyebrow" style="color:var(--navy-dark); font-weight:700;">OFFICIAL MONOSPACED ACTION RECEIPT</span>
+        <h3 style="font-size:1.3rem; margin-top:2px;">PM-AJAY Livelihood Action Card</h3>
+      </div>
+      <span style="background:#DCFCE7; color:#15803D; font-weight:700; font-size:0.75rem; padding:4px 10px; border-radius:6px;">
+        CSC / PMKK READY
+      </span>
+    </div>
+    <p style="font-size:0.84rem; color:var(--ink-sub); margin-bottom:14px;">
+      Carry this official monospaced action card to your local CSC Centre or the District Welfare Officer at Sector 62 PMKK for priority grant processing.
+    </p>
+
+    <!-- Monospaced Code Card formatted exactly like n8n agent -->
+    <div class="action-card-mono" id="action-card-mono-content">
+==================================================
+        PM-AJAY LIVELIHOOD ACTION CARD
+==================================================
+BENEFICIARY ID: KRM-2026-GBN-8842
+NAME: Sunita Devi
+DISTRICT: Gautam Buddha Nagar, Uttar Pradesh
+CATEGORY: Scheduled Caste (SC) Verified
+ANNUAL INCOME: ₹1,20,000 (Under ₹2.50L Limit)
+--------------------------------------------------
+IDENTIFIED TRADE: Tailoring & Garment Manufacturing
+QP CODE: AMH/Q1947 (NSQF Level 4)
+SECTOR: Apparel, Made-Ups & Home Furnishing
+RPL STATUS: Eligible (12-Hr Camp + ₹500 DBT)
+--------------------------------------------------
+FINANCIAL ASSISTANCE (PM-AJAY GIA):
+- PROJECT COST: ₹65,000
+- GOVT CAPITAL GRANT (50%): ₹32,500 [Non-Repayable]
+- NSFDC CONCESSIONAL LOAN: ₹32,500 @ 6.0% p.a.
+- EST. MONTHLY INCOME: ₹18,000 - ₹24,000
+--------------------------------------------------
+DOCUMENT VERIFICATION (LlamaParse OCR):
+[✓] Aadhaar Card: VERIFIED
+[✓] SC Caste Certificate: VERIFIED (Tehsildar GBN)
+[✓] Income Certificate: VERIFIED (₹1.20L/yr)
+[✓] Bank Passbook: VERIFIED (Aadhaar Seeded)
+--------------------------------------------------
+NEXT STEP: Report to District Welfare Officer / CSC
+CAMP LOCATION: Sector 62 PMKK Center, Noida
+==================================================
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
+      <button class="btn-ghost" onclick="copyActionCardToClipboard()">📋 Copy to Clipboard</button>
+      <button class="btn-yellow-pill" onclick="printActionCard()">🖨️ Print / Save PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================= -->
+<!-- MODAL 2: LLAMAPARSE OCR DOCUMENT INSPECTOR MODAL -->
+<!-- ================================================================= -->
+<div class="k-modal-backdrop" id="ocr-inspector-modal">
+  <div class="k-modal-dialog">
+    <button class="k-modal-close" onclick="closeOcrModal()">✕</button>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <div>
+        <span class="eyebrow" style="color:var(--navy-dark); font-weight:700;">LLAMAPARSE OCR INSPECTOR</span>
+        <h3 style="font-size:1.3rem; margin-top:2px;" id="ocr-modal-title">Aadhaar Card Extraction Data</h3>
+      </div>
+      <span class="dossier-status-pill verified" id="ocr-modal-badge">CONFIDENCE 99.4%</span>
+    </div>
+    <p style="font-size:0.82rem; color:var(--ink-sub); margin-bottom:14px;">
+      Extracted directly via LlamaParse OCR parsing into the Supabase <code>user_documents</code> schema.
+    </p>
+
+    <div style="background:#FAF8F4; border:1px solid var(--border-light); border-radius:10px; padding:14px; margin-bottom:14px; font-size:0.82rem;" id="ocr-modal-fields">
+      <!-- Populated dynamically -->
+    </div>
+
+    <div style="font-size:0.75rem; font-weight:700; color:var(--navy-dark); margin-bottom:6px;">RAW OCR PARSED TEXT SNIPPET:</div>
+    <div class="action-card-mono" id="ocr-modal-raw" style="max-height:160px;">
+      <!-- Populated dynamically -->
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; margin-top:16px;">
+      <button class="btn-navy-pill" onclick="closeOcrModal()">Done Viewing</button>
+    </div>
   </div>
 </div>
 
