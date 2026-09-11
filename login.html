@@ -34,23 +34,15 @@
           <p id="login-subtitle">Access your career workspace, schemes & skills</p>
         </div>
 
-        <!-- ROLE SEPARATOR TABS -->
-        <div class="auth-role-tabs" style="grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 3px;">
-          <button type="button" class="auth-role-tab active" id="tab-btn-student" onclick="setLoginRole('student')" style="padding: 8px 4px; font-size: 0.74rem;">
-            <span class="tab-icon" style="font-size:0.95rem;">🎓</span>
-            <span class="tab-label">Student</span>
+        <!-- ROLE SEPARATOR TABS (TWO DISTINCT PORTALS) -->
+        <div class="auth-role-tabs" style="grid-template-columns: 1fr 1fr; gap: 8px; padding: 4px;">
+          <button type="button" class="auth-role-tab active" id="tab-btn-student" onclick="setLoginRole('student')" style="padding: 10px 8px; font-size: 0.82rem;">
+            <span class="tab-icon" style="font-size:1.1rem;">🎓</span>
+            <span class="tab-label">Student & Youth</span>
           </button>
-          <button type="button" class="auth-role-tab" id="tab-btn-worker" onclick="setLoginRole('worker')" style="padding: 8px 4px; font-size: 0.74rem;">
-            <span class="tab-icon" style="font-size:0.95rem;">🛠️</span>
-            <span class="tab-label">Worker</span>
-          </button>
-          <button type="button" class="auth-role-tab" id="tab-btn-artisan" onclick="setLoginRole('artisan')" style="padding: 8px 4px; font-size: 0.74rem;">
-            <span class="tab-icon" style="font-size:0.95rem;">🧵</span>
-            <span class="tab-label">Artisan</span>
-          </button>
-          <button type="button" class="auth-role-tab" id="tab-btn-entrepreneur" onclick="setLoginRole('entrepreneur')" style="padding: 8px 4px; font-size: 0.74rem;">
-            <span class="tab-icon" style="font-size:0.95rem;">🏪</span>
-            <span class="tab-label">Business</span>
+          <button type="button" class="auth-role-tab" id="tab-btn-worker" onclick="setLoginRole('worker')" style="padding: 10px 8px; font-size: 0.82rem;">
+            <span class="tab-icon" style="font-size:1.1rem;">🛠️</span>
+            <span class="tab-label">Worker / Artisan / Business</span>
           </button>
         </div>
 

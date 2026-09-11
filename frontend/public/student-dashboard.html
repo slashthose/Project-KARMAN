@@ -1,13 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script>
-  // Automatic portal router: redirect worker/artisan/business to beneficiary dashboard
-  const userRole = (localStorage.getItem('karman_role') || 'student').toLowerCase();
-  if (userRole === 'worker' || userRole === 'artisan' || userRole === 'entrepreneur' || userRole === 'business') {
-    window.location.replace('beneficiary-dashboard.html');
-  }
-</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="KARMAN Career Workspace — skill mapping, readiness scoring and roadmap dashboard.">

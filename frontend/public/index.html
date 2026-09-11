@@ -370,65 +370,41 @@
     }
     </script>
 
-  <!-- ROLE CHOOSER MODAL FOR OPEN CAREER LAB -->
+  <!-- ROLE CHOOSER MODAL FOR OPEN CAREER LAB (TWO SEPARATE PORTALS) -->
   <div class="workflow-modal-backdrop" id="roleChooserModal" onclick="if(event.target === this) closeRoleChooserModal()">
-    <div class="workflow-modal-window" style="max-width:540px; border-radius:18px; padding:28px 28px 24px;">
+    <div class="workflow-modal-window" style="max-width:520px; border-radius:18px; padding:28px 28px 24px;">
       <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
         <div>
           <span class="eyebrow" style="color:var(--navy-dark); font-weight:700;">PROJECT KARMAN WORKSPACE</span>
-          <h3 style="font-size:1.45rem; margin-top:2px; font-family:var(--font-display);">Choose your pathway</h3>
-          <p style="font-size:0.86rem; color:var(--ink-sub); margin-top:4px;">Select how you wish to enter the career workspace:</p>
+          <h3 style="font-size:1.45rem; margin-top:2px; font-family:var(--font-display);">Choose your workspace</h3>
+          <p style="font-size:0.86rem; color:var(--ink-sub); margin-top:4px;">Select the portal matching your profile:</p>
         </div>
         <button onclick="closeRoleChooserModal()" class="btn-sidebar-toggle" style="width:30px; height:30px;">✕</button>
       </div>
 
-      <div style="display:grid; grid-template-columns:1fr; gap:10px; margin-bottom:20px;">
-        <!-- 1. Student -->
-        <div onclick="launchRolePortal('student')" style="background:#FAF8F4; border:1.5px solid var(--border-light); border-radius:12px; padding:14px 16px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; transition:all 0.18s ease;" onmouseover="this.style.borderColor='var(--navy-dark)'; this.style.background='#FFFFFF';" onmouseout="this.style.borderColor='var(--border-light)'; this.style.background='#FAF8F4';">
-          <div style="display:flex; align-items:center; gap:12px;">
-            <span style="font-size:1.5rem;">🎓</span>
+      <div style="display:grid; grid-template-columns:1fr; gap:14px; margin-bottom:20px;">
+        <!-- 1. Student Portal -->
+        <div onclick="window.location.href='student-dashboard.html'" style="background:#FAF8F4; border:2px solid var(--border-light); border-radius:12px; padding:16px 18px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; transition:all 0.18s ease;" onmouseover="this.style.borderColor='var(--navy-dark)'; this.style.background='#FFFFFF';" onmouseout="this.style.borderColor='var(--border-light)'; this.style.background='#FAF8F4';">
+          <div style="display:flex; align-items:center; gap:14px;">
+            <span style="font-size:1.8rem;">🎓</span>
             <div>
-              <strong style="font-size:0.94rem; color:var(--navy-dark); display:block;">Student & Youth</strong>
-              <span style="font-size:0.78rem; color:var(--ink-sub);">Resume Analyzer, Project Lab, Career Roadmap & Builder</span>
+              <strong style="font-size:1.02rem; color:var(--navy-dark); display:block;">Student & Youth Portal</strong>
+              <span style="font-size:0.8rem; color:var(--ink-sub);">Original Career Workspace: Career Roadmap, Resume Analyzer, Project Lab & ATS Scorer</span>
             </div>
           </div>
-          <span style="font-size:0.85rem; font-weight:700; color:var(--navy-dark);">Enter →</span>
+          <span style="font-size:0.95rem; font-weight:800; color:var(--navy-dark); flex-shrink:0;">Enter →</span>
         </div>
 
-        <!-- 2. Worker -->
-        <div onclick="launchRolePortal('worker')" style="background:#FAF8F4; border:1.5px solid var(--border-light); border-radius:12px; padding:14px 16px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; transition:all 0.18s ease;" onmouseover="this.style.borderColor='var(--navy-dark)'; this.style.background='#FFFFFF';" onmouseout="this.style.borderColor='var(--border-light)'; this.style.background='#FAF8F4';">
-          <div style="display:flex; align-items:center; gap:12px;">
-            <span style="font-size:1.5rem;">🛠️</span>
+        <!-- 2. Worker, Artisan & Business Portal -->
+        <div onclick="window.location.href='beneficiary-dashboard.html'" style="background:#FAF8F4; border:2px solid var(--border-light); border-radius:12px; padding:16px 18px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; transition:all 0.18s ease;" onmouseover="this.style.borderColor='var(--navy-dark)'; this.style.background='#FFFFFF';" onmouseout="this.style.borderColor='var(--border-light)'; this.style.background='#FAF8F4';">
+          <div style="display:flex; align-items:center; gap:14px;">
+            <span style="font-size:1.8rem;">🛠️</span>
             <div>
-              <strong style="font-size:0.94rem; color:var(--navy-dark); display:block;">Worker</strong>
-              <span style="font-size:0.78rem; color:var(--ink-sub);">Scheme Newsroom, Trade Identifier, RPL & PM-AJAY Grant</span>
+              <strong style="font-size:1.02rem; color:var(--navy-dark); display:block;">Worker, Artisan & Business Portal</strong>
+              <span style="font-size:0.8rem; color:var(--ink-sub);">Unified Livelihood Hub: Trade Identifier, RPL Certification, PM-AJAY Grants & Micro-Enterprise Plan</span>
             </div>
           </div>
-          <span style="font-size:0.85rem; font-weight:700; color:var(--navy-dark);">Enter →</span>
-        </div>
-
-        <!-- 3. Artisan -->
-        <div onclick="launchRolePortal('artisan')" style="background:#FAF8F4; border:1.5px solid var(--border-light); border-radius:12px; padding:14px 16px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; transition:all 0.18s ease;" onmouseover="this.style.borderColor='var(--navy-dark)'; this.style.background='#FFFFFF';" onmouseout="this.style.borderColor='var(--border-light)'; this.style.background='#FAF8F4';">
-          <div style="display:flex; align-items:center; gap:12px;">
-            <span style="font-size:1.5rem;">🧵</span>
-            <div>
-              <strong style="font-size:0.94rem; color:var(--navy-dark); display:block;">Artisan (कारीगर / शिल्पकार)</strong>
-              <span style="font-size:0.78rem; color:var(--ink-sub);">Craft RPL Certification, Vishwakarma & Equipment Linkage</span>
-            </div>
-          </div>
-          <span style="font-size:0.85rem; font-weight:700; color:var(--navy-dark);">Enter →</span>
-        </div>
-
-        <!-- 4. Micro-Entrepreneur -->
-        <div onclick="launchRolePortal('entrepreneur')" style="background:#FAF8F4; border:1.5px solid var(--border-light); border-radius:12px; padding:14px 16px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; transition:all 0.18s ease;" onmouseover="this.style.borderColor='var(--navy-dark)'; this.style.background='#FFFFFF';" onmouseout="this.style.borderColor='var(--border-light)'; this.style.background='#FAF8F4';">
-          <div style="display:flex; align-items:center; gap:12px;">
-            <span style="font-size:1.5rem;">🏪</span>
-            <div>
-              <strong style="font-size:0.94rem; color:var(--navy-dark); display:block;">Micro-Entrepreneur</strong>
-              <span style="font-size:0.78rem; color:var(--ink-sub);">Enterprise Plan, Capital Subsidy & Business Equipment Report</span>
-            </div>
-          </div>
-          <span style="font-size:0.85rem; font-weight:700; color:var(--navy-dark);">Enter →</span>
+          <span style="font-size:0.95rem; font-weight:800; color:var(--navy-dark); flex-shrink:0;">Enter →</span>
         </div>
       </div>
     </div>

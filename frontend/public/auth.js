@@ -1,17 +1,21 @@
 // Authentication Handlers for Login and Registration
 let currentLoginRole = 'student';
 
+function getPortalTarget(role) {
+  if (role === 'worker' || role === 'artisan' || role === 'entrepreneur' || role === 'business') {
+    return 'beneficiary-dashboard.html';
+  }
+  return 'student-dashboard.html';
+}
+
 function setLoginRole(role) {
   currentLoginRole = role;
   const tabStudent = document.getElementById('tab-btn-student');
   const tabWorker = document.getElementById('tab-btn-worker');
-  const tabArtisan = document.getElementById('tab-btn-artisan');
-  const tabEntrepreneur = document.getElementById('tab-btn-entrepreneur');
 
-  if (tabStudent) tabStudent.classList.toggle('active', role === 'student');
-  if (tabWorker) tabWorker.classList.toggle('active', role === 'worker');
-  if (tabArtisan) tabArtisan.classList.toggle('active', role === 'artisan');
-  if (tabEntrepreneur) tabEntrepreneur.classList.toggle('active', role === 'entrepreneur');
+  const isStudent = role === 'student';
+  if (tabStudent) tabStudent.classList.toggle('active', isStudent);
+  if (tabWorker) tabWorker.classList.toggle('active', !isStudent);
 
   const title = document.getElementById('login-title');
   const subtitle = document.getElementById('login-subtitle');
@@ -24,9 +28,9 @@ function setLoginRole(role) {
   const btnOtp = document.getElementById('btn-request-otp');
   const btnSubmit = document.getElementById('btn-login-submit');
 
-  if (role === 'student') {
-    if (title) title.innerText = "Log into your account";
-    if (subtitle) subtitle.innerText = "Access your career workspace, schemes & skills";
+  if (isStudent) {
+    if (title) title.innerText = "Student & Youth Portal Login";
+    if (subtitle) subtitle.innerText = "Access your original career roadmap, resume analyzer & tech lab";
     if (socialBlock) socialBlock.style.display = 'block';
     if (workerQuickBlock) workerQuickBlock.style.display = 'none';
     if (lblIdentifier) lblIdentifier.innerText = "Student Email Address";
@@ -41,47 +45,13 @@ function setLoginRole(role) {
     }
     if (btnOtp) btnOtp.style.display = 'none';
     if (btnSubmit) btnSubmit.innerText = "Continue to Student Workspace →";
-  } else if (role === 'artisan') {
-    if (title) title.innerText = "Artisan & Craftsman Login (कारीगर लॉगिन)";
-    if (subtitle) subtitle.innerText = "Access craft RPL certification, PM Vishwakarma & toolkit linkages";
-    if (socialBlock) socialBlock.style.display = 'none';
-    if (workerQuickBlock) workerQuickBlock.style.display = 'block';
-    if (lblIdentifier) lblIdentifier.innerText = "Artisan Mobile / ID (कारीगर मोबाइल)";
-    if (inputEmail) {
-      inputEmail.placeholder = "e.g. 919876543222";
-      inputEmail.value = "919876543222";
-    }
-    if (lblPass) lblPass.innerText = "SMS OTP / Password (ओटीपी)";
-    if (inputPass) {
-      inputPass.placeholder = "Enter 4-digit OTP or password";
-      inputPass.value = "1234";
-    }
-    if (btnOtp) btnOtp.style.display = 'inline-block';
-    if (btnSubmit) btnSubmit.innerText = "Continue to Artisan Portal →";
-  } else if (role === 'entrepreneur') {
-    if (title) title.innerText = "Micro-Enterprise Login (उद्यम लॉगिन)";
-    if (subtitle) subtitle.innerText = "Access enterprise plans, capital subsidies & equipment checklists";
-    if (socialBlock) socialBlock.style.display = 'none';
-    if (workerQuickBlock) workerQuickBlock.style.display = 'block';
-    if (lblIdentifier) lblIdentifier.innerText = "Udyam Mobile / Reg No (मोबाइल नंबर)";
-    if (inputEmail) {
-      inputEmail.placeholder = "e.g. 919876543333";
-      inputEmail.value = "919876543333";
-    }
-    if (lblPass) lblPass.innerText = "SMS OTP / Password (ओटीपी)";
-    if (inputPass) {
-      inputPass.placeholder = "Enter 4-digit OTP or password";
-      inputPass.value = "1234";
-    }
-    if (btnOtp) btnOtp.style.display = 'inline-block';
-    if (btnSubmit) btnSubmit.innerText = "Continue to Enterprise Portal →";
   } else {
-    // worker
-    if (title) title.innerText = "Worker Login (श्रमिक / कामगार)";
-    if (subtitle) subtitle.innerText = "Access your livelihood skill mapping, RPL certificate & schemes";
+    // Worker / Artisan / Business
+    if (title) title.innerText = "Beneficiary Portal Login (श्रमिक / शिल्पकार / उद्यम)";
+    if (subtitle) subtitle.innerText = "Access your livelihood mapping, RPL certificate, PM-AJAY grants & enterprise plan";
     if (socialBlock) socialBlock.style.display = 'none';
     if (workerQuickBlock) workerQuickBlock.style.display = 'block';
-    if (lblIdentifier) lblIdentifier.innerText = "Registered Mobile Number (मोबाइल नंबर)";
+    if (lblIdentifier) lblIdentifier.innerText = "Registered Mobile / ID (मोबाइल नंबर)";
     if (inputEmail) {
       inputEmail.placeholder = "e.g. 919876543210";
       inputEmail.value = "919876543210";
@@ -92,7 +62,7 @@ function setLoginRole(role) {
       inputPass.value = "1234";
     }
     if (btnOtp) btnOtp.style.display = 'inline-block';
-    if (btnSubmit) btnSubmit.innerText = "Continue to Worker Portal →";
+    if (btnSubmit) btnSubmit.innerText = "Continue to Beneficiary Portal →";
   }
 }
 
@@ -107,40 +77,27 @@ function requestWorkerOtp() {
 }
 
 function handleSocialLogin(role) {
-  if (role === 'worker') {
+  if (role === 'worker' || role === 'artisan' || role === 'entrepreneur') {
     localStorage.setItem('karman_user', JSON.stringify({ name: 'Sunita Devi', identifier: '919876543210', role: 'worker', trade: 'Tailoring & Sewing' }));
     localStorage.setItem('karman_user_id', 'sunita@karman.gov.in');
     localStorage.setItem('karman_role', 'worker');
     localStorage.setItem('karman_token', 'token_worker_' + Date.now());
-  } else if (role === 'artisan') {
-    localStorage.setItem('karman_user', JSON.stringify({ name: 'Rameshwar Sharma', identifier: '919876543222', role: 'artisan', trade: 'Heritage Handloom & Carpentry' }));
-    localStorage.setItem('karman_user_id', 'rameshwar@karman.gov.in');
-    localStorage.setItem('karman_role', 'artisan');
-    localStorage.setItem('karman_token', 'token_artisan_' + Date.now());
-  } else if (role === 'entrepreneur') {
-    localStorage.setItem('karman_user', JSON.stringify({ name: 'Vikram Patel', identifier: '919876543333', role: 'entrepreneur', trade: 'Two Wheeler Service Micro-Enterprise' }));
-    localStorage.setItem('karman_user_id', 'vikram@karman.gov.in');
-    localStorage.setItem('karman_role', 'entrepreneur');
-    localStorage.setItem('karman_token', 'token_entrepreneur_' + Date.now());
+    window.location.href = 'beneficiary-dashboard.html';
   } else {
     localStorage.setItem('karman_user', JSON.stringify({ name: 'Arjun Mehta', identifier: 'arjun@karman.gov.in', role: 'student', trade: 'AI / ML Engineer' }));
     localStorage.setItem('karman_user_id', 'arjun@karman.gov.in');
     localStorage.setItem('karman_role', 'student');
     localStorage.setItem('karman_token', 'token_student_' + Date.now());
+    window.location.href = 'student-dashboard.html';
   }
-  window.location.href = 'dashboard.html';
 }
 
 // Check URL param on page load (e.g. login.html?role=worker)
 document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
   const roleParam = (urlParams.get('role') || '').toLowerCase();
-  if (roleParam === 'worker') {
+  if (roleParam === 'worker' || roleParam === 'artisan' || roleParam === 'entrepreneur' || roleParam === 'business') {
     setLoginRole('worker');
-  } else if (roleParam === 'artisan') {
-    setLoginRole('artisan');
-  } else if (roleParam === 'entrepreneur' || roleParam === 'business') {
-    setLoginRole('entrepreneur');
   } else {
     setLoginRole('student');
   }
@@ -164,7 +121,7 @@ async function handleLogin(e) {
       localStorage.setItem('karman_token', res.token);
       localStorage.setItem('karman_user_id', identifier);
       localStorage.setItem('karman_role', currentLoginRole);
-      window.location.href = 'dashboard.html';
+      window.location.href = getPortalTarget(currentLoginRole);
       return false;
     } else {
       alert("Invalid credentials. Please try again.");
@@ -174,15 +131,9 @@ async function handleLogin(e) {
     // Fallback login
     let defaultName = 'Arjun Mehta';
     let defaultTrade = 'AI / ML Engineer';
-    if (currentLoginRole === 'worker') {
+    if (currentLoginRole === 'worker' || currentLoginRole === 'artisan' || currentLoginRole === 'entrepreneur') {
       defaultName = 'Sunita Devi';
       defaultTrade = 'Tailoring & Sewing';
-    } else if (currentLoginRole === 'artisan') {
-      defaultName = 'Rameshwar Sharma';
-      defaultTrade = 'Heritage Handloom & Carpentry';
-    } else if (currentLoginRole === 'entrepreneur') {
-      defaultName = 'Vikram Patel';
-      defaultTrade = 'Two Wheeler Service Micro-Enterprise';
     } else if (identifier.includes('@')) {
       defaultName = identifier.split('@')[0];
     } else {
@@ -192,11 +143,11 @@ async function handleLogin(e) {
     localStorage.setItem('karman_token', 'token_' + Date.now());
     localStorage.setItem('karman_user_id', identifier);
     localStorage.setItem('karman_role', currentLoginRole);
-    window.location.href = 'dashboard.html';
+    window.location.href = getPortalTarget(currentLoginRole);
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.innerText = currentLoginRole === 'student' ? "Continue to Student Workspace →" : "Continue to Portal →";
+      submitBtn.innerText = currentLoginRole === 'student' ? "Continue to Student Workspace →" : "Continue to Beneficiary Portal →";
     }
   }
   return false;
@@ -231,7 +182,7 @@ async function handleSignup(e) {
       localStorage.setItem('karman_token', res.token);
       localStorage.setItem('karman_user_id', email);
       localStorage.setItem('karman_role', role);
-      window.location.href = 'dashboard.html';
+      window.location.href = getPortalTarget(role);
       return false;
     }
   } catch (err) {
@@ -240,7 +191,7 @@ async function handleSignup(e) {
     localStorage.setItem('karman_token', 'token_' + Date.now());
     localStorage.setItem('karman_user_id', email);
     localStorage.setItem('karman_role', role);
-    window.location.href = 'dashboard.html';
+    window.location.href = getPortalTarget(role);
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
