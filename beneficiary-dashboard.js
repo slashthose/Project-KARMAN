@@ -138,7 +138,7 @@ const nsqfTradeMatrix = {
     dprTitle: "Commercial & Residential Sanitary Fitting Enterprise",
     equipment: [
       { name: "PPR / CPVC Hot Melt Socket Fusion Machine", sub: "Precision thermostat pipe welder for seamless joints" },
-      { name: "Hand Pipe Threading & Die Set (1/2" to 2")", sub: "Heavy duty ratchet threader with pipe vice" },
+      { name: "Hand Pipe Threading & Die Set (1/2 to 2 Inch)", sub: "Heavy duty ratchet threader with pipe vice" },
       { name: "Submersible Pressure Test Pump & Inspection Snake", sub: "Leak-testing pressure gauge and drain snake" }
     ],
     competenciesHave: [
@@ -320,7 +320,9 @@ function showPage(pageId) {
   if (pageId === 'newsroom') loadNewsroomData();
   if (pageId === 'enterprise') recalculateGrant();
 
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 }
 
 // 4. Apply NSQF Trade to Entire Dashboard
@@ -999,3 +1001,27 @@ document.addEventListener('DOMContentLoaded', () => {
   loadNewsroomData();
   switchBotChannel('whatsapp');
 });
+
+// Explicitly expose functions to window scope for inline HTML onclick handlers
+if (typeof window !== 'undefined') {
+  window.showPage = showPage;
+  window.applyNsqfTrade = applyNsqfTrade;
+  window.recalculateGrant = recalculateGrant;
+  window.openActionCardModal = openActionCardModal;
+  window.closeActionCardModal = closeActionCardModal;
+  window.inspectOcrDoc = inspectOcrDoc;
+  window.closeOcrModal = closeOcrModal;
+  window.copyActionCardToClipboard = copyActionCardToClipboard;
+  window.printActionCard = printActionCard;
+  window.startHeroVoiceIntake = startHeroVoiceIntake;
+  window.processHeroIntake = processHeroIntake;
+  window.executeLiveSearch = executeLiveSearch;
+  window.toggleSidebar = toggleSidebar;
+  window.setDashboardLanguage = setDashboardLanguage;
+  window.switchBotChannel = switchBotChannel;
+  window.handleTgSendBtn = handleTgSendBtn;
+  window.handleTgInputKey = handleTgInputKey;
+  window.tgReply = tgReply;
+  window.refreshNewsroomData = refreshNewsroomData;
+}
+
