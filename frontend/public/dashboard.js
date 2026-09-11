@@ -84,12 +84,20 @@ function applyProfileToDOM(profile) {
   const builderPhone = document.getElementById('builder-phone');
   const builderDistrict = document.getElementById('builder-district');
   const builderTrade = document.getElementById('builder-trade');
+  const hdrName = document.getElementById('hdr-user-name');
+  const hdrRole = document.getElementById('hdr-user-role');
+  const hdrInitials = document.getElementById('hdr-user-initials');
 
   if (nameEl && profile.full_name) nameEl.innerText = profile.full_name;
   if (profileNameInput && profile.full_name) profileNameInput.value = profile.full_name;
   if (builderName && profile.full_name) builderName.value = profile.full_name;
   if (builderPhone && profile.phone_number) builderPhone.value = profile.phone_number;
   if (builderDistrict && profile.district) builderDistrict.value = profile.district;
+  
+  if (hdrName && profile.full_name) hdrName.innerText = profile.full_name;
+  if (hdrInitials && profile.full_name) hdrInitials.innerText = profile.full_name.charAt(0).toUpperCase();
+  if (hdrRole && profile.target_trade) hdrRole.innerText = `${profile.target_trade} · Level 4`;
+
   if (builderTrade && profile.target_trade) {
     for (let i = 0; i < builderTrade.options.length; i++) {
       if (builderTrade.options[i].text.includes(profile.target_trade) || builderTrade.options[i].value.includes(profile.target_trade)) {
@@ -848,11 +856,130 @@ function switchBotChannel(channel) {
   }
 }
 
+// ---------------- BENEFICIARY LIVELIHOOD MAPPING CONTROLLERS ---------------- //
+function selectBeneficiaryPersona(persona) {
+  const cards = document.querySelectorAll('.persona-card');
+  cards.forEach(c => c.classList.remove('active-persona'));
+
+  const tradeTitle = document.getElementById('bene-trade-title');
+  const qpCode = document.getElementById('bene-qp-code');
+  const readinessPct = document.getElementById('bene-readiness-pct');
+  const readinessBar = document.getElementById('bene-readiness-bar');
+  const expVal = document.getElementById('bene-exp-val');
+
+  if (persona === 'youth') {
+    if (cards[0]) cards[0].classList.add('active-persona');
+    if (tradeTitle) tradeTitle.innerText = "Solar PV Installer Technician";
+    if (qpCode) qpCode.innerText = "SGJ/Q0101 — Solar Rooftop Tech";
+    if (readinessPct) readinessPct.innerText = "72%";
+    if (readinessBar) readinessBar.style.width = "72%";
+    if (expVal) expVal.innerText = "ITI / Vocational Pass";
+  } else if (persona === 'artisan') {
+    if (cards[1]) cards[1].classList.add('active-persona');
+    if (tradeTitle) tradeTitle.innerText = "Tailoring & Garment Manufacturing";
+    if (qpCode) qpCode.innerText = "AMH/Q0301 — Sewing Machine Operator";
+    if (readinessPct) readinessPct.innerText = "88%";
+    if (readinessBar) readinessBar.style.width = "88%";
+    if (expVal) expVal.innerText = "5+ Years (Informal)";
+  } else if (persona === 'entrepreneur') {
+    if (cards[2]) cards[2].classList.add('active-persona');
+    if (tradeTitle) tradeTitle.innerText = "Two Wheeler Service Micro-Enterprise";
+    if (qpCode) qpCode.innerText = "ASC/Q1401 — Two Wheeler Lead Technician";
+    if (readinessPct) readinessPct.innerText = "92%";
+    if (readinessBar) readinessBar.style.width = "92%";
+    if (expVal) expVal.innerText = "6+ Years Experience";
+  }
+}
+
+function startHeroVoiceIntake() {
+  const heroInput = document.getElementById('hero-intake-input');
+  const micBtn = document.getElementById('hero-mic-btn');
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    alert("Voice recognition is available in Google Chrome or modern browsers. Please type your trade below.");
+    return;
+  }
+
+  const rec = new SpeechRecognition();
+  rec.lang = 'hi-IN'; // Multi-lingual Hindi / Hinglish intake
+  rec.interimResults = true;
+
+  if (micBtn) {
+    micBtn.style.background = '#059669';
+    micBtn.innerHTML = `<span>Listening... बोलिए</span>`;
+  }
+
+  rec.onresult = (e) => {
+    let text = '';
+    for (let i = e.resultIndex; i < e.results.length; ++i) {
+      text += e.results[i][0].transcript;
+    }
+    if (heroInput) heroInput.value = text;
+  };
+
+  rec.onend = () => {
+    if (micBtn) {
+      micBtn.style.background = '#E53E3E';
+      micBtn.innerHTML = `<span>🎤 Start Voice (आवाज़ से बताएं)</span>`;
+    }
+    if (heroInput && heroInput.value.trim()) {
+      processHeroIntake();
+    }
+  };
+
+  rec.start();
+}
+
+async function processHeroIntake() {
+  const input = document.getElementById('hero-intake-input');
+  const query = (input ? input.value : '').trim();
+  if (!query) return;
+
+  const tradeTitle = document.getElementById('bene-trade-title');
+  const qpCode = document.getElementById('bene-qp-code');
+
+  if (tradeTitle) tradeTitle.innerText = "Mapping trade...";
+
+  try {
+    const res = await KarmanAPI.simulateIntake(query, "919876543210");
+    if (res && res.nsqf_mapping) {
+      if (tradeTitle) tradeTitle.innerText = res.extracted_skill || "Craft / Artisan Trade";
+      if (qpCode) qpCode.innerText = `${res.nsqf_mapping.qp_code} — ${res.nsqf_mapping.role}`;
+      alert(`Mapped to ${res.extracted_skill} (${res.nsqf_mapping.qp_code})! Linked to ${res.pm_ajay_eligibility ? 'PM-AJAY Capital Grant (₹50,000)' : 'RPL Scheme'}.`);
+    }
+  } catch (err) {
+    if (tradeTitle) tradeTitle.innerText = "Tailoring & Garment Manufacturing";
+    if (qpCode) qpCode.innerText = "AMH/Q0301 — Sewing Machine Operator";
+  }
+}
+
+function setDashboardLanguage(lang) {
+  const hiBtn = document.getElementById('hdr-lang-hi');
+  const enBtn = document.getElementById('hdr-lang-en');
+  if (lang === 'hi') {
+    if (hiBtn) { hiBtn.style.background = '#162035'; hiBtn.style.color = '#fff'; }
+    if (enBtn) { enBtn.style.background = 'transparent'; enBtn.style.color = '#5C564A'; }
+  } else {
+    if (enBtn) { enBtn.style.background = '#162035'; enBtn.style.color = '#fff'; }
+    if (hiBtn) { hiBtn.style.background = 'transparent'; hiBtn.style.color = '#5C564A'; }
+  }
+}
+
 // Execute on DOM Ready
 document.addEventListener('DOMContentLoaded', () => {
+  const savedRole = localStorage.getItem('karman_role');
   initUserProfile();
   initSidebarResizer();
-  changeRole('AI / ML Engineer');
+  
+  // If student logged in, default target trade to AI / ML or tech role
+  if (savedRole === 'student') {
+    changeRole('AI / ML Engineer');
+  } else {
+    // Default beneficiary view
+    selectBeneficiaryPersona('artisan');
+  }
+  
   loadNewsroomData();
   switchBotChannel('whatsapp');
 });

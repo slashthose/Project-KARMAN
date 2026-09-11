@@ -1513,6 +1513,49 @@ body.dashboard-page {
   color: var(--navy-dark);
 }
 
+/* Role Switcher Tabs (Student vs Worker) */
+.auth-role-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  background: #EAE6DF;
+  padding: 4px;
+  border-radius: 12px;
+  margin-bottom: 18px;
+  border: 1px solid var(--border-light);
+}
+
+.auth-role-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  color: var(--ink-sub);
+  font-weight: 600;
+  font-size: 0.84rem;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.auth-role-tab:hover {
+  color: var(--navy-dark);
+}
+
+.auth-role-tab.active {
+  background: #FFFFFF;
+  color: var(--navy-dark);
+  box-shadow: 0 2px 8px rgba(22, 32, 53, 0.08);
+  font-weight: 700;
+}
+
+.auth-role-tab .tab-icon {
+  font-size: 1.1rem;
+}
+
 /* Standard Laptop Landscape Optimization (<= 800px height) */
 @media (max-height: 800px) and (min-width: 901px) {
   .auth-split-content {
@@ -1665,4 +1708,114 @@ body.dashboard-page {
   from { transform: scale(0.96) translateY(12px); opacity: 0; }
   to { transform: scale(1) translateY(0); opacity: 1; }
 }
+
+/* ---------------- BENEFICIARY LIVELIHOOD MAPPING STYLES ---------------- */
+.persona-card:hover {
+  background: rgba(244, 197, 66, 0.12) !important;
+  border-color: var(--yellow-hero) !important;
+  transform: translateY(-2px);
+}
+
+.persona-card.active-persona {
+  box-shadow: 0 4px 14px rgba(244, 197, 66, 0.2);
+}
+
+.bene-pipeline-track {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bene-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #FAF8F4;
+  border: 1.5px solid var(--border-light);
+  border-radius: 10px;
+  padding: 10px 14px;
+  transition: all 0.18s ease;
+}
+
+.bene-step.done {
+  border-color: #BBF7D0;
+  background: #F0FDF4;
+}
+
+.bene-step.active {
+  border-color: var(--navy-dark);
+  background: #FFFFFF;
+  box-shadow: 0 2px 10px rgba(22, 32, 53, 0.06);
+}
+
+.bene-step .step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #E2E8F0;
+  color: var(--navy-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.78rem;
+  flex-shrink: 0;
+}
+
+.bene-step.done .step-num {
+  background: var(--green-text);
+  color: #FFFFFF;
+}
+
+.bene-step.active .step-num {
+  background: var(--yellow-hero);
+  color: var(--navy-dark);
+}
+
+.bene-step .step-content {
+  flex: 1;
+}
+
+.bene-step .step-head {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--navy-dark);
+}
+
+.bene-step .step-sub {
+  font-size: 0.75rem;
+  color: var(--ink-sub);
+  margin-top: 1px;
+}
+
+.step-badge {
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
+.step-badge.success {
+  background: #DCFCE7;
+  color: #15803D;
+}
+
+.step-badge.rec {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+.step-badge.pend {
+  background: #F1F5F9;
+  color: #64748B;
+}
+
+@media (max-width: 980px) {
+  .beneficiary-mid-grid, .beneficiary-scheme-gap-grid {
+    grid-template-columns: 1fr !fr !important;
+  }
+}
+
 

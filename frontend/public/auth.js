@@ -1,7 +1,101 @@
 // Authentication Handlers for Login and Registration
+let currentLoginRole = 'student';
+
+function setLoginRole(role) {
+  currentLoginRole = role;
+  const tabStudent = document.getElementById('tab-btn-student');
+  const tabWorker = document.getElementById('tab-btn-worker');
+  const title = document.getElementById('login-title');
+  const subtitle = document.getElementById('login-subtitle');
+  const socialBlock = document.getElementById('student-social-block');
+  const workerQuickBlock = document.getElementById('worker-quick-block');
+  const lblIdentifier = document.getElementById('lbl-identifier');
+  const inputEmail = document.getElementById('login-email');
+  const lblPass = document.getElementById('lbl-pass');
+  const inputPass = document.getElementById('login-pass');
+  const btnOtp = document.getElementById('btn-request-otp');
+  const btnSubmit = document.getElementById('btn-login-submit');
+
+  if (role === 'worker') {
+    if (tabWorker) tabWorker.classList.add('active');
+    if (tabStudent) tabStudent.classList.remove('active');
+    if (title) title.innerText = "Log into your account";
+    if (subtitle) subtitle.innerText = "Access your livelihood skill mapping, RPL certificate & schemes";
+    if (socialBlock) socialBlock.style.display = 'none';
+    if (workerQuickBlock) workerQuickBlock.style.display = 'block';
+    if (lblIdentifier) lblIdentifier.innerText = "Registered Mobile Number (मोबाइल नंबर)";
+    if (inputEmail) {
+      inputEmail.placeholder = "e.g. 919876543210";
+      inputEmail.value = "919876543210";
+    }
+    if (lblPass) lblPass.innerText = "SMS OTP / Password (ओटीपी)";
+    if (inputPass) {
+      inputPass.placeholder = "Enter 4-digit OTP or password";
+      inputPass.value = "1234";
+    }
+    if (btnOtp) btnOtp.style.display = 'inline-block';
+    if (btnSubmit) btnSubmit.innerText = "Continue →";
+  } else {
+    if (tabStudent) tabStudent.classList.add('active');
+    if (tabWorker) tabWorker.classList.remove('active');
+    if (title) title.innerText = "Log into your account";
+    if (subtitle) subtitle.innerText = "Access your career workspace, schemes & skills";
+    if (socialBlock) socialBlock.style.display = 'block';
+    if (workerQuickBlock) workerQuickBlock.style.display = 'none';
+    if (lblIdentifier) lblIdentifier.innerText = "Student Email Address";
+    if (inputEmail) {
+      inputEmail.placeholder = "e.g., arjun@karman.gov.in";
+      inputEmail.value = "arjun@karman.gov.in";
+    }
+    if (lblPass) lblPass.innerText = "Password";
+    if (inputPass) {
+      inputPass.placeholder = "••••••••";
+      inputPass.value = "password123";
+    }
+    if (btnOtp) btnOtp.style.display = 'none';
+    if (btnSubmit) btnSubmit.innerText = "Continue →";
+  }
+}
+
+function requestWorkerOtp() {
+  const phone = (document.getElementById('login-email') || {}).value || '919876543210';
+  alert(`ओटीपी भेजा गया (OTP Sent)! A 4-digit code (1234) has been sent to +${phone}.`);
+  const pass = document.getElementById('login-pass');
+  if (pass) {
+    pass.value = '1234';
+    pass.focus();
+  }
+}
+
+function handleSocialLogin(role) {
+  if (role === 'worker') {
+    localStorage.setItem('karman_user', JSON.stringify({ name: 'Sunita Devi', identifier: '919876543210', role: 'worker', trade: 'Tailoring & Sewing' }));
+    localStorage.setItem('karman_user_id', 'sunita@karman.gov.in');
+    localStorage.setItem('karman_role', 'worker');
+    localStorage.setItem('karman_token', 'token_worker_' + Date.now());
+  } else {
+    localStorage.setItem('karman_user', JSON.stringify({ name: 'Arjun Mehta', identifier: 'arjun@karman.gov.in', role: 'student', trade: 'AI / ML Engineer' }));
+    localStorage.setItem('karman_user_id', 'arjun@karman.gov.in');
+    localStorage.setItem('karman_role', 'student');
+    localStorage.setItem('karman_token', 'token_student_' + Date.now());
+  }
+  window.location.href = 'dashboard.html';
+}
+
+// Check URL param on page load (e.g. login.html?role=worker)
+document.addEventListener('DOMContentLoaded', () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const roleParam = urlParams.get('role');
+  if (roleParam === 'worker' || roleParam === 'artisan' || roleParam === 'beneficiary') {
+    setLoginRole('worker');
+  } else {
+    setLoginRole('student');
+  }
+});
+
 async function handleLogin(e) {
   e.preventDefault();
-  const email = document.getElementById('login-email').value.trim();
+  const identifier = document.getElementById('login-email').value.trim();
   const pass = document.getElementById('login-pass').value;
   const submitBtn = e.target.querySelector('button[type="submit"]');
 
@@ -11,11 +105,12 @@ async function handleLogin(e) {
   }
 
   try {
-    const res = await KarmanAPI.login(email, pass, "student");
+    const res = await KarmanAPI.login(identifier, pass, currentLoginRole);
     if (res && res.status === "authenticated") {
       localStorage.setItem('karman_user', JSON.stringify(res.user_profile));
       localStorage.setItem('karman_token', res.token);
-      localStorage.setItem('karman_user_id', email);
+      localStorage.setItem('karman_user_id', identifier);
+      localStorage.setItem('karman_role', currentLoginRole);
       window.location.href = 'dashboard.html';
       return false;
     } else {
@@ -24,14 +119,17 @@ async function handleLogin(e) {
   } catch (err) {
     console.error(err);
     // Fallback login
-    localStorage.setItem('karman_user', JSON.stringify({ name: email.split('@')[0], identifier: email, role: 'student' }));
+    const defaultName = currentLoginRole === 'worker' ? 'Sunita Devi' : (identifier.includes('@') ? identifier.split('@')[0] : identifier);
+    const defaultTrade = currentLoginRole === 'worker' ? 'Tailoring & Sewing' : 'AI / ML Engineer';
+    localStorage.setItem('karman_user', JSON.stringify({ name: defaultName, identifier, role: currentLoginRole, trade: defaultTrade }));
     localStorage.setItem('karman_token', 'token_' + Date.now());
-    localStorage.setItem('karman_user_id', email);
+    localStorage.setItem('karman_user_id', identifier);
+    localStorage.setItem('karman_role', currentLoginRole);
     window.location.href = 'dashboard.html';
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.innerText = "Sign In →";
+      submitBtn.innerText = currentLoginRole === 'worker' ? "Continue to Beneficiary Portal →" : "Continue to Student Workspace →";
     }
   }
   return false;
@@ -65,6 +163,7 @@ async function handleSignup(e) {
       localStorage.setItem('karman_user', JSON.stringify(res.user_profile));
       localStorage.setItem('karman_token', res.token);
       localStorage.setItem('karman_user_id', email);
+      localStorage.setItem('karman_role', role);
       window.location.href = 'dashboard.html';
       return false;
     }
@@ -73,6 +172,7 @@ async function handleSignup(e) {
     localStorage.setItem('karman_user', JSON.stringify({ name, identifier: email, role }));
     localStorage.setItem('karman_token', 'token_' + Date.now());
     localStorage.setItem('karman_user_id', email);
+    localStorage.setItem('karman_role', role);
     window.location.href = 'dashboard.html';
   } finally {
     if (submitBtn) {
