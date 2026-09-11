@@ -410,6 +410,21 @@ function applyNsqfTrade(code) {
   const settingTradeSelect = document.getElementById('setting-trade-select');
   if (settingTradeSelect) settingTradeSelect.value = code;
 
+  // Update Hub Section Cards
+  const hubBadge = document.getElementById('hub-trade-badge');
+  const hubTitle = document.getElementById('hub-trade-title');
+  const hubDesc = document.getElementById('hub-trade-desc');
+  const hubWage = document.getElementById('hub-trade-wage');
+  const hubDprTitle = document.getElementById('hub-dpr-title');
+  const hubDprDesc = document.getElementById('hub-dpr-desc');
+
+  if (hubBadge) hubBadge.innerText = trade.level;
+  if (hubTitle) hubTitle.innerText = trade.title;
+  if (hubDesc) hubDesc.innerHTML = `Current Trade: <strong>${trade.code} — ${trade.roleName}</strong>. Mapped via AI RAG from practical experience.`;
+  if (hubWage) hubWage.innerText = `Earning: ${trade.wage}`;
+  if (hubDprTitle) hubDprTitle.innerText = `Micro-Enterprise: ${trade.dprTitle}`;
+  if (hubDprDesc) hubDprDesc.innerText = `Equipment: ${trade.equipment && trade.equipment[0] ? trade.equipment[0].name : 'Standard Tools'}. Up to ₹50,000 PM-AJAY Grant + NSFDC Loan.`;
+
   // Recalculate financial sliders
   recalculateGrant();
   updateActionCardText();
