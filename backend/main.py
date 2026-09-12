@@ -197,11 +197,17 @@ class UserProfile(BaseModel):
     current_status: str        # "Unemployed", "Informal Worker", "Student"
     preferred_language: Optional[str] = "English"
 
+    class Config:
+        extra = "allow"
+
 class SkillSubmission(BaseModel):
     user_id: str
     skills_list: List[str]
     tools_handled: List[str]
     certifications: Optional[List[str]] = []
+
+    class Config:
+        extra = "allow"
 
 class RegisterRequest(BaseModel):
     user_type: str = "student" # 'student', 'worker', 'officer'

@@ -275,7 +275,7 @@ const nsqfTradeMatrix = {
   }
 };
 
-// 2. Beneficiary Persona Presets
+// 2. Beneficiary Persona Presets & Dynamic Active User Resolver
 const beneficiaryPersonas = {
   worker: {
     roleKey: "worker",
@@ -303,6 +303,43 @@ const beneficiaryPersonas = {
   }
 };
 
+function getActiveUser() {
+  let u = {};
+  try {
+    const raw = localStorage.getItem('karman_user');
+    if (raw) u = JSON.parse(raw);
+  } catch (e) {}
+
+  let savedRole = (localStorage.getItem('karman_role') || u.role || u.user_type || 'worker').toLowerCase();
+  if (savedRole === 'business') savedRole = 'entrepreneur';
+  const defaultPersona = beneficiaryPersonas[savedRole] || beneficiaryPersonas.worker;
+
+  const name = u.full_name || u.name || defaultPersona.userName;
+  const phone = u.phone_number || u.identifier || u.user_id || "919876543210";
+  const district = u.district || defaultPersona.district;
+  const role = savedRole;
+
+  const parts = name.trim().split(/\s+/);
+  let initials = "B";
+  if (parts.length >= 2) {
+    initials = (parts[0][0] + parts[1][0]).toUpperCase();
+  } else if (parts.length === 1 && parts[0].length > 0) {
+    initials = parts[0][0].toUpperCase();
+  }
+
+  return {
+    name,
+    phone,
+    identifier: phone,
+    district,
+    role,
+    initials,
+    targetTrade: u.target_trade || u.trade || null,
+    dprCost: u.dpr_cost || null,
+    yearsExperience: u.years_experience || 4.0
+  };
+}
+
 let currentTradeCode = "AMH/Q1947";
 let activeBeneficiaryRole = "worker";
 
@@ -325,11 +362,42 @@ function showPage(pageId) {
   }
 }
 
-// 4. Apply NSQF Trade to Entire Dashboard
-function applyNsqfTrade(code) {
+// 4. Apply NSQF Trade to Entire Dashboard (with MongoDB Persistence)
+function applyNsqfTrade(code, persistToBackend = true) {
   const trade = nsqfTradeMatrix[code];
   if (!trade) return;
   currentTradeCode = code;
+
+  // Persist asynchronously in MongoDB Atlas if enabled
+  if (persistToBackend) {
+    const user = getActiveUser();
+    fetch('/api/profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: user.identifier,
+        full_name: user.name,
+        phone_number: user.identifier,
+        education_level: trade.entry,
+        district: user.district,
+        target_trade: trade.title,
+        years_experience: user.yearsExperience,
+        current_status: "GIA Eligible",
+        preferred_language: "Hindi"
+      })
+    }).catch(() => {});
+
+    fetch('/api/skills', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: user.identifier,
+        skills_list: trade.competenciesHave,
+        tools_handled: trade.equipment ? trade.equipment.map(e => e.name) : [],
+        certifications: [trade.level]
+      })
+    }).catch(() => {});
+  }
 
   // Update Trade Chips
   const chips = document.querySelectorAll('.nsqf-chip');
@@ -476,10 +544,12 @@ function startHeroVoiceIntake() {
   rec.start();
 }
 
-function processHeroIntake() {
+async function processHeroIntake() {
   const input = document.getElementById('hero-intake-input');
   const query = (input ? input.value : '').toLowerCase().trim();
   if (!query) return;
+
+  const user = getActiveUser();
 
   // Semantic keyword matching against the 9 n8n skill matrix domains
   let matchedCode = "AMH/Q1947"; // Default tailoring
@@ -502,10 +572,31 @@ function processHeroIntake() {
   }
 
   applyNsqfTrade(matchedCode);
+
+  // Send intake query to backend simulate-intake to persist to MongoDB Atlas and compile customized PDF
+  try {
+    const res = await fetch('/api/simulate-intake', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        phone: user.identifier,
+        name: user.name,
+        district: user.district,
+        user_query: query
+      })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.generated_pdf_url) {
+        window.lastGeneratedPdfUrl = data.generated_pdf_url;
+      }
+    }
+  } catch (e) {
+    console.log("Simulate intake fallback used");
+  }
+
   const trade = nsqfTradeMatrix[matchedCode];
-  alert(`✅ Matched with ${trade.title} (${trade.code})!
-Standardized to ${trade.level}.
-Eligible for PM-AJAY capital subsidy and ₹500 RPL incentive.`);
+  alert(`✅ Matched with ${trade.title} (${trade.code})!\n👤 Beneficiary: ${user.name}\nStandardized to ${trade.level}.\nEligible for PM-AJAY capital subsidy and ₹500 RPL incentive.`);
 }
 
 function executeLiveSearch(query) {
@@ -585,15 +676,19 @@ function updateActionCardText() {
   const subsidyAmount = Math.min(Math.round(projectCost * 0.50), 50000);
   const loanAmount = projectCost - subsidyAmount;
 
-  const persona = beneficiaryPersonas[activeBeneficiaryRole] || beneficiaryPersonas.worker;
+  const user = getActiveUser();
   const trade = nsqfTradeMatrix[currentTradeCode] || nsqfTradeMatrix["AMH/Q1947"];
+  const maskedAadhaar = "XXXX-XXXX-" + (user.identifier.replace(/\D/g, '').slice(-4) || "4819");
+  const cleanId = user.identifier.replace(/\D/g, '').slice(-4) || "8842";
+  const distShort = user.district.split(',')[0] || "District Command";
 
   const text = `==================================================
         PM-AJAY LIVELIHOOD ACTION CARD
 ==================================================
-BENEFICIARY ID: KRM-2026-GBN-8842
-NAME: ${persona.userName}
-DISTRICT: ${persona.district}
+BENEFICIARY ID: KRM-2026-DIST-${cleanId}
+NAME: ${user.name}
+MOBILE: +${user.identifier}
+DISTRICT: ${user.district}
 CATEGORY: Scheduled Caste (SC) Verified
 ANNUAL INCOME: ₹${familyIncome.toLocaleString('en-IN')} (${familyIncome <= 250000 ? 'Within ₹2.50L Limit' : 'Above ₹2.50L Limit'})
 --------------------------------------------------
@@ -609,13 +704,13 @@ FINANCIAL ASSISTANCE (PM-AJAY GIA):
 - EST. MONTHLY INCOME: ${trade.wage}
 --------------------------------------------------
 DOCUMENT VERIFICATION (LlamaParse OCR):
-[✓] Aadhaar Card: VERIFIED (UIDAI Active)
-[✓] SC Caste Certificate: VERIFIED (Tehsildar GBN)
+[✓] Aadhaar Card: VERIFIED (${maskedAadhaar})
+[✓] SC Caste Certificate: VERIFIED (Tehsildar Office, ${distShort})
 [✓] Income Certificate: VERIFIED (₹${familyIncome.toLocaleString('en-IN')}/yr)
-[✓] Bank Passbook: VERIFIED (Aadhaar Seeded)
+[✓] Bank Passbook: VERIFIED (Aadhaar Seeded & DBT Enabled)
 --------------------------------------------------
 NEXT STEP: Report to District Social Welfare Officer / CSC
-CAMP LOCATION: Sector 62 PMKK Center, Noida
+CAMP LOCATION: District Skill Development Centre, ${distShort}
 ==================================================`;
 
   monoEl.innerText = text;
@@ -647,89 +742,92 @@ function printActionCard() {
   window.print();
 }
 
-// 8. LlamaParse OCR Document Inspector Modal
-const ocrDocumentData = {
-  aadhaar: {
-    title: "Aadhaar Card Extraction (UIDAI)",
-    confidence: "CONFIDENCE 99.4%",
-    fields: `
-      <div><strong>Full Name:</strong> Sunita Devi</div>
-      <div style="margin-top:4px;"><strong>Aadhaar Number:</strong> XXXX-XXXX-4819</div>
-      <div style="margin-top:4px;"><strong>DOB / Year:</strong> 1988</div>
-      <div style="margin-top:4px;"><strong>Address:</strong> Village Chhapraula, Dadri, Gautam Buddha Nagar, UP 201009</div>
-      <div style="margin-top:4px;"><strong>NPCI DBT Status:</strong> Enabled (Linked to State Bank of India)</div>
-    `,
-    raw: `--- LlamaParse OCR Stream (UIDAI Form 2) ---
+// 8. LlamaParse OCR Document Inspector Modal (Dynamic Multi-User)
+function inspectOcrDoc(docKey) {
+  const user = getActiveUser();
+  const maskedAadhaar = "XXXX-XXXX-" + (user.identifier.replace(/\D/g, '').slice(-4) || "4819");
+  const distShort = user.district.split(',')[0] || "Gautam Buddha Nagar";
+  const rawClean = user.identifier.replace(/\D/g, '') || "919876543210";
+
+  const dynamicOcrData = {
+    aadhaar: {
+      title: `Aadhaar Card Extraction (UIDAI) — ${user.name}`,
+      confidence: "CONFIDENCE 99.4%",
+      fields: `
+        <div><strong>Full Name:</strong> ${user.name}</div>
+        <div style="margin-top:4px;"><strong>Aadhaar Number:</strong> ${maskedAadhaar}</div>
+        <div style="margin-top:4px;"><strong>DOB / Year:</strong> 1988</div>
+        <div style="margin-top:4px;"><strong>Address:</strong> ${user.district}, India</div>
+        <div style="margin-top:4px;"><strong>NPCI DBT Status:</strong> Enabled (Linked to Public Sector Bank)</div>
+      `,
+      raw: `--- LlamaParse OCR Stream (UIDAI Form 2) ---
 Government of India / Unique Identification Authority of India
-Enrollment No: 1048/82910/01928
-Name: Sunita Devi
-W/O: Rajesh Kumar
-Year of Birth: 1988
-Gender: Female / महिला
-Address: H.No 42, Gram Chhapraula, P.O Dadri, Gautam Buddha Nagar, Uttar Pradesh - 201009
-Aadhaar No: XXXX XXXX 4819
+Enrollment No: 1048/${rawClean.slice(-5)}/01928
+Name: ${user.name}
+Aadhaar No: ${maskedAadhaar}
+District: ${user.district}
+NPCI DBT: Seeded & Active
 Digital Signature: Validated (UIDAI CA)`
-  },
-  caste: {
-    title: "SC Caste Certificate (Revenue Dept UP)",
-    confidence: "CONFIDENCE 98.7%",
-    fields: `
-      <div><strong>Beneficiary Category:</strong> Scheduled Caste (SC)</div>
-      <div style="margin-top:4px;"><strong>Sub-Caste:</strong> Chamar / Jatav</div>
-      <div style="margin-top:4px;"><strong>Certificate Number:</strong> UP-SC-2023-884192</div>
-      <div style="margin-top:4px;"><strong>Issuing Authority:</strong> Tehsildar, Gautam Buddha Nagar</div>
-      <div style="margin-top:4px;"><strong>Issue Date:</strong> 14-08-2023 (Lifetime Validity)</div>
-    `,
-    raw: `--- LlamaParse OCR Stream (e-District UP) ---
-Office of the Tehsildar, Gautam Buddha Nagar, Uttar Pradesh
+    },
+    caste: {
+      title: `SC Caste Certificate (Revenue Dept) — ${user.name}`,
+      confidence: "CONFIDENCE 98.7%",
+      fields: `
+        <div><strong>Beneficiary Name:</strong> ${user.name}</div>
+        <div style="margin-top:4px;"><strong>Beneficiary Category:</strong> Scheduled Caste (SC)</div>
+        <div style="margin-top:4px;"><strong>Certificate Number:</strong> UP-SC-2023-${rawClean.slice(-6)}</div>
+        <div style="margin-top:4px;"><strong>Issuing Authority:</strong> Tehsildar, ${distShort}</div>
+        <div style="margin-top:4px;"><strong>Issue Date:</strong> 14-08-2023 (Lifetime Validity)</div>
+      `,
+      raw: `--- LlamaParse OCR Stream (e-District UP) ---
+Office of the Tehsildar, ${distShort}, Uttar Pradesh
 Certificate of Scheduled Caste / अनुसूचित जाति प्रमाण पत्र
-Application No: 231590029841
-Certificate No: UP-SC-2023-884192
-This is to certify that Smt. Sunita Devi resident of Dadri Tehsil,
-District Gautam Buddha Nagar belongs to the Scheduled Caste recognized
-under Constitution (Scheduled Castes) Order 1950.
-Signed: Tehsildar Dadri (Digital Seal UP-EDIST-2023)`
-  },
-  income: {
-    title: "Annual Income Certificate",
-    confidence: "CONFIDENCE 97.9%",
-    fields: `
-      <div><strong>Certified Annual Family Income:</strong> ₹1,20,000 / year</div>
-      <div style="margin-top:4px;"><strong>Statutory Ceiling:</strong> ≤ ₹2,50,000 (PASSED ✓)</div>
-      <div style="margin-top:4px;"><strong>Certificate Number:</strong> UP-INC-2024-110294</div>
-      <div style="margin-top:4px;"><strong>Valid Through:</strong> 31st March 2027</div>
-    `,
-    raw: `--- LlamaParse OCR Stream (Revenue Department) ---
+Application No: 231590${rawClean.slice(-5)}
+Certificate No: UP-SC-2023-${rawClean.slice(-6)}
+This is to certify that ${user.name} resident of ${user.district} belongs to the Scheduled Caste recognized under Constitution (Scheduled Castes) Order 1950.
+Signed: Tehsildar (Digital Seal UP-EDIST)`
+    },
+    income: {
+      title: `Annual Income Certificate — ${user.name}`,
+      confidence: "CONFIDENCE 97.9%",
+      fields: `
+        <div><strong>Applicant Name:</strong> ${user.name}</div>
+        <div style="margin-top:4px;"><strong>Certified Annual Family Income:</strong> ₹1,20,000 / year</div>
+        <div style="margin-top:4px;"><strong>Statutory Ceiling:</strong> ≤ ₹2,50,000 (PASSED ✓)</div>
+        <div style="margin-top:4px;"><strong>Certificate Number:</strong> UP-INC-2024-${rawClean.slice(-6)}</div>
+        <div style="margin-top:4px;"><strong>Valid Through:</strong> 31st March 2027</div>
+      `,
+      raw: `--- LlamaParse OCR Stream (Revenue Department) ---
 Office of District Magistrate / Sub-Divisional Magistrate
 Annual Income Verification Certificate
-Applicant: Sunita Devi
-Income from Tailoring & Self-Employment: Rs. 1,20,000 per annum
-Rupees One Lakh Twenty Thousand Only.
-Income Status: Below Poverty Line / Non-Creamy Layer
+Applicant: ${user.name}
+District: ${user.district}
+Income from Self-Employment: Rs. 1,20,000 per annum
+Income Status: Below Poverty Line / Non-Creamy Layer (PM-AJAY Eligible)
 Certificate Valid till: 31-03-2027`
-  },
-  bank: {
-    title: "Bank Passbook (Aadhaar DBT Enabled)",
-    confidence: "CONFIDENCE 98.4%",
-    fields: `
-      <div><strong>Bank Name:</strong> State Bank of India (Noida Sector 62 Branch)</div>
-      <div style="margin-top:4px;"><strong>Account Number:</strong> 3829XXXX710</div>
-      <div style="margin-top:4px;"><strong>IFSC Code:</strong> SBIN0014298</div>
-      <div style="margin-top:4px;"><strong>Aadhaar Seeding (NPCI Mapper):</strong> ACTIVE (Direct Benefit Ready)</div>
-    `,
-    raw: `--- LlamaParse OCR Stream (Core Banking System) ---
+    },
+    bank: {
+      title: `Bank Passbook (Aadhaar DBT Enabled) — ${user.name}`,
+      confidence: "CONFIDENCE 98.4%",
+      fields: `
+        <div><strong>Account Holder:</strong> ${user.name}</div>
+        <div style="margin-top:4px;"><strong>Bank Name:</strong> State Bank of India (${distShort} Branch)</div>
+        <div style="margin-top:4px;"><strong>Account Number:</strong> 3829XXXX${rawClean.slice(-4)}</div>
+        <div style="margin-top:4px;"><strong>IFSC Code:</strong> SBIN0014298</div>
+        <div style="margin-top:4px;"><strong>Aadhaar Seeding (NPCI Mapper):</strong> ACTIVE (Direct Benefit Ready)</div>
+      `,
+      raw: `--- LlamaParse OCR Stream (Core Banking System) ---
 State Bank of India / भारतीय स्टेट बैंक
-Branch: Sector 62 Institutional Area, Noida 201309
-A/c Holder: Sunita Devi
+Branch: ${distShort} Branch
+A/c Holder: ${user.name}
 A/c Type: Savings Bank (Basic / PMJDY)
-A/c Number: 3829019284710
+A/c Number: 38290192${rawClean.slice(-4)}
 IFSC: SBIN0014298
-DBT Mandate: Aadhaar Number XXXX-XXXX-4819 seeded on 10-Jan-2024`
-  }
-};
+DBT Mandate: Aadhaar ${maskedAadhaar} seeded & verified`
+    }
+  };
 
-function inspectOcrDoc(docKey) {
-  const data = ocrDocumentData[docKey];
+  const data = dynamicOcrData[docKey];
   if (!data) return;
 
   const modal = document.getElementById('ocr-inspector-modal');
@@ -833,6 +931,8 @@ function sendTgUserMessage(text) {
   const chatBody = document.getElementById('tg-chat-body');
   if (!chatBody) return;
 
+  const user = getActiveUser();
+
   const userDiv = document.createElement('div');
   userDiv.className = 'tg-msg user';
   userDiv.style.cssText = 'align-self:flex-end; background:#DCF8C6; padding:10px 14px; border-radius:8px; max-width:80%; font-size:0.84rem; line-height:1.4; box-shadow:0 1px 2px rgba(0,0,0,0.1);';
@@ -848,28 +948,46 @@ function sendTgUserMessage(text) {
     chatBody.appendChild(botDiv);
     chatBody.scrollTop = chatBody.scrollHeight;
 
-    const trade = nsqfTradeMatrix[currentTradeCode];
+    const trade = nsqfTradeMatrix[currentTradeCode] || nsqfTradeMatrix["AMH/Q1947"];
+
     try {
-      if (window.KarmanAPI && KarmanAPI.chat) {
-        const res = await KarmanAPI.chat(text, "919876543210");
-        if (res && res.reply) {
-          botDiv.innerHTML = res.reply.replace(/\n/g, '<br>');
+      const response = await fetch('/api/n8n/bot-intake', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          channel: "whatsapp",
+          sender_id: user.identifier,
+          sender_name: user.name,
+          message_text: text,
+          district: user.district
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.status === "success" && data.reply_text) {
+          botDiv.innerHTML = data.reply_text.replace(/\n/g, '<br>');
+          if (data.pdf_url) {
+            botDiv.innerHTML += `<br><br><a href="${data.pdf_url}" target="_blank" style="display:inline-block; margin-top:6px; background:#162035; color:#F4C542; padding:6px 12px; border-radius:6px; font-weight:bold; text-decoration:none;">📄 Download Your 5-Page Action Roadmap (PDF) ↗</a>`;
+          }
           chatBody.scrollTop = chatBody.scrollHeight;
           return;
         }
       }
-    } catch (e) {}
+    } catch (e) {
+      console.log("Using dynamic client fallback for bot");
+    }
 
-    // Resilient fallback responses matching n8n agent
+    // Dynamic fallback addressing user by name
     const lower = text.toLowerCase();
     if (lower.includes('grant') || lower.includes('paisa') || lower.includes('50000') || lower.includes('cost')) {
-      botDiv.innerHTML = `Namaste! 🙏 Under <strong>PM-AJAY GIA Section 4.2</strong>, you are eligible for <strong>50% capital grant up to ₹50,000</strong> for ${trade.title}. No repayment is required. The remaining amount is covered via NSFDC loan at 6.0% interest.`;
+      botDiv.innerHTML = `Namaste ${user.name}! 🙏 Under <strong>PM-AJAY GIA Section 4.2</strong>, you are eligible for <strong>50% capital grant up to ₹50,000</strong> for ${trade.title}. No repayment is required. The remaining amount is covered via NSFDC / Mudra loan at 6.0% interest.`;
     } else if (lower.includes('camp') || lower.includes('rpl') || lower.includes('when')) {
-      botDiv.innerHTML = `The next <strong>PMKVY 4.0 RPL Orientation Camp</strong> in Gautam Buddha Nagar is scheduled for <strong>Next Tuesday at 10:00 AM</strong> at the Sector 62 PMKK Training Centre, Noida. You receive a QR-coded Skill India certificate and ₹500 DBT reward upon completion!`;
+      botDiv.innerHTML = `Namaste ${user.name}! The next <strong>PMKVY 4.0 RPL Orientation Camp</strong> in ${user.district} is scheduled for <strong>Next Tuesday at 10:00 AM</strong> at the nearest District PMKK Center. You receive a QR-coded Skill India certificate and ₹500 DBT reward upon completion!`;
     } else if (lower.includes('doc') || lower.includes('check') || lower.includes('aadhaar')) {
-      botDiv.innerHTML = `Your Citizen Dossier has <strong>4 of 4 mandatory documents verified</strong> via LlamaParse OCR:<br>✓ Aadhaar (UIDAI Verified)<br>✓ SC Caste Certificate (Tehsildar GBN)<br>✓ Income Certificate (≤ ₹2.50L)<br>✓ SBI Bank Passbook (DBT Seeded)`;
+      botDiv.innerHTML = `Namaste ${user.name}! Your Citizen Dossier has <strong>4 of 4 mandatory documents verified</strong> via LlamaParse OCR:<br>✓ Aadhaar (UIDAI Verified)<br>✓ SC Caste Certificate (Tehsildar Office)<br>✓ Income Certificate (≤ ₹2.50L)<br>✓ Bank Passbook (Aadhaar Seeded & DBT Active)`;
     } else {
-      botDiv.innerHTML = `Namaste! 🙏 Your profile is mapped to <strong>${trade.title} (${trade.code}, ${trade.level})</strong>. You have 88%+ practical alignment and are eligible for the ₹50,000 PM-AJAY equipment grant!`;
+      botDiv.innerHTML = `Namaste ${user.name}! 🙏 Your profile is mapped to <strong>${trade.title} (${trade.code}, ${trade.level})</strong>. You have 88%+ practical alignment and are eligible for the ₹50,000 PM-AJAY equipment grant!`;
     }
     chatBody.scrollTop = chatBody.scrollHeight;
   }, 450);
@@ -928,33 +1046,33 @@ async function loadNewsroomData(forceRefresh = false) {
               <span style="background:#F8FAFC; padding:2px 8px; border-radius:6px; color:#334155;">🎯 <strong>Eligibility:</strong> ${item.relevant_to || 'National Beneficiaries'}</span>
             </div>
           </div>
-          <div style="text-align:right; min-width:145px; flex-shrink:0; display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
-            <div class="amount">${item.amount || 'Govt Grant'}</div>
-            <a href="${item.official_url}" target="_blank" onclick="event.stopPropagation();" style="display:inline-flex; align-items:center; gap:4px; font-size:0.76rem; font-weight:600; padding:5px 12px; border-radius:6px; background:#FAF8F4; border:1px solid var(--border-light); color:var(--navy-dark); text-decoration:none; transition:all 0.15s ease;">
-              Official Notice ↗
-            </a>
+          <div class="action">
+            <button class="btn-ghost" style="padding:5px 11px; font-size:.78rem;">Details →</button>
           </div>
         </div>
       `).join('');
-    } else {
-      container.innerHTML = '<p style="color:var(--ink-sub); font-size:.88rem;">No recent updates found. Click "Fetch Latest Govt News" above to retry.</p>';
     }
   } catch (err) {
-    console.warn("Could not fetch remote newsroom:", err);
-    container.innerHTML = '<p style="color:#DC2626; font-size:.88rem;">Unable to connect to live government feed. Please check internet connectivity and retry.</p>';
+    console.error("Newsroom error:", err);
   }
 }
 
-// 11. Language Toggle
+// 11. Bilingual Language Switcher (Hindi / English)
 function setDashboardLanguage(lang) {
-  const hiBtn = document.getElementById('hdr-lang-hi');
-  const enBtn = document.getElementById('hdr-lang-en');
-  if (lang === 'hi') {
-    if (hiBtn) { hiBtn.style.background = '#162035'; hiBtn.style.color = '#fff'; }
-    if (enBtn) { enBtn.style.background = 'transparent'; enBtn.style.color = '#5C564A'; }
-  } else {
-    if (enBtn) { enBtn.style.background = '#162035'; enBtn.style.color = '#fff'; }
-    if (hiBtn) { hiBtn.style.background = 'transparent'; hiBtn.style.color = '#5C564A'; }
+  const isHi = lang === 'hi';
+  const btnHi = document.getElementById('hdr-lang-hi');
+  const btnEn = document.getElementById('hdr-lang-en');
+
+  if (btnHi && btnEn) {
+    btnHi.style.background = isHi ? '#162035' : 'transparent';
+    btnHi.style.color = isHi ? '#fff' : '#5C564A';
+    btnEn.style.background = !isHi ? '#162035' : 'transparent';
+    btnEn.style.color = !isHi ? '#fff' : '#5C564A';
+  }
+
+  const motto = document.querySelector('.karman-motto-text');
+  if (motto) {
+    motto.innerText = isHi ? '"आपका हुनर। आपकी आजीविका। आपकी तरक्की।"' : '"Your skills. Your livelihood. Your next step."';
   }
 }
 
@@ -991,16 +1109,10 @@ function toggleSidebar() {
   if (frame) frame.classList.toggle('sidebar-collapsed');
 }
 
-// 13. DOM Initializer (Role Determination from Login)
-document.addEventListener('DOMContentLoaded', () => {
-  initSidebarResizer();
-
-  // Determine Role from Login (Worker, Artisan, Entrepreneur/Business)
-  let savedRole = (localStorage.getItem('karman_role') || 'worker').toLowerCase();
-  if (savedRole === 'business') savedRole = 'entrepreneur';
-  activeBeneficiaryRole = savedRole;
-
-  const persona = beneficiaryPersonas[activeBeneficiaryRole] || beneficiaryPersonas.worker;
+// 13. Dynamic Profile Hydration & MongoDB Sync
+async function hydrateBeneficiaryProfile() {
+  const user = getActiveUser();
+  activeBeneficiaryRole = user.role;
 
   // Set Profile in Header & Settings
   const hdrName = document.getElementById('hdr-user-name');
@@ -1008,17 +1120,174 @@ document.addEventListener('DOMContentLoaded', () => {
   const hdrInitials = document.getElementById('hdr-user-initials');
   const settingName = document.getElementById('setting-full-name');
   const settingDistrict = document.getElementById('setting-district');
+  const settingPhone = document.getElementById('setting-phone');
 
-  if (hdrName) hdrName.innerText = persona.userName;
-  if (hdrRole) hdrRole.innerText = persona.userRole;
-  if (hdrInitials) hdrInitials.innerText = persona.userInitials;
-  if (settingName) settingName.value = persona.userName;
-  if (settingDistrict) settingDistrict.value = persona.district;
+  const roleTitle = user.role.charAt(0).toUpperCase() + user.role.slice(1) + " · Level 4";
 
-  // Apply Default Trade for the selected role
-  applyNsqfTrade(persona.defaultTrade);
+  if (hdrName) hdrName.innerText = user.name;
+  if (hdrRole) hdrRole.innerText = roleTitle;
+  if (hdrInitials) hdrInitials.innerText = user.initials;
+  if (settingName) settingName.value = user.name;
+  if (settingDistrict) settingDistrict.value = user.district;
+  if (settingPhone) settingPhone.value = user.phone;
 
-  // Initialize Newsroom and Bot
+  // Determine initial trade: user target trade or role default
+  let initialTrade = user.targetTrade;
+  if (!initialTrade) {
+    const defaultPersona = beneficiaryPersonas[activeBeneficiaryRole] || beneficiaryPersonas.worker;
+    initialTrade = defaultPersona.defaultTrade;
+  }
+
+  // Fetch persisted profile from MongoDB Atlas to get saved trade & cost
+  try {
+    const res = await fetch(`/api/profile/${encodeURIComponent(user.phone)}`);
+    if (res.ok) {
+      const p = await res.json();
+      if (p.full_name) {
+        user.name = p.full_name;
+        if (hdrName) hdrName.innerText = p.full_name;
+        if (settingName) settingName.value = p.full_name;
+      }
+      if (p.district) {
+        user.district = p.district;
+        if (settingDistrict) settingDistrict.value = p.district;
+      }
+      if (p.target_trade) {
+        const match = Object.entries(nsqfTradeMatrix).find(([code, t]) => code === p.target_trade || t.title.toLowerCase() === p.target_trade.toLowerCase());
+        if (match) {
+          initialTrade = match[0];
+        }
+      }
+      if (p.dpr_cost) {
+        const costSlider = document.getElementById('calc-project-cost');
+        if (costSlider) {
+          costSlider.value = p.dpr_cost;
+        }
+      }
+    } else {
+      // First-time visitor profile registration in MongoDB
+      await fetch('/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: user.phone,
+          full_name: user.name,
+          phone_number: user.phone,
+          education_level: "Informal Experience",
+          district: user.district,
+          target_trade: nsqfTradeMatrix[initialTrade] ? nsqfTradeMatrix[initialTrade].title : "Tailoring & Garment Manufacturing",
+          years_experience: user.yearsExperience,
+          current_status: "GIA Eligible",
+          preferred_language: "Hindi"
+        })
+      });
+    }
+  } catch (err) {
+    console.log("Offline mode or backend unavailable, using local session state.", err);
+  }
+
+  applyNsqfTrade(initialTrade, false);
+  updateActionCardText();
+}
+
+// 14. Save Profile Settings to MongoDB Atlas
+async function saveUserProfileSettings() {
+  const nameInput = document.getElementById('setting-full-name');
+  const distInput = document.getElementById('setting-district');
+  const phoneInput = document.getElementById('setting-phone');
+
+  const newName = nameInput ? nameInput.value.trim() : "";
+  const newDist = distInput ? distInput.value.trim() : "";
+  const newPhone = phoneInput ? phoneInput.value.trim() : "";
+
+  if (!newName) {
+    alert("Please enter a valid full name.");
+    return;
+  }
+
+  const user = getActiveUser();
+  user.name = newName;
+  if (newDist) user.district = newDist;
+  if (newPhone) user.identifier = newPhone;
+
+  localStorage.setItem('karman_user', JSON.stringify({
+    name: user.name,
+    identifier: user.identifier,
+    district: user.district,
+    role: user.role
+  }));
+
+  try {
+    const res = await fetch('/api/profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: user.identifier,
+        full_name: user.name,
+        phone_number: user.identifier,
+        education_level: "Informal Experience",
+        district: user.district,
+        target_trade: nsqfTradeMatrix[currentTradeCode].title,
+        years_experience: user.yearsExperience,
+        current_status: "GIA Eligible",
+        preferred_language: "Hindi"
+      })
+    });
+    if (res.ok) {
+      alert("✅ Profile details successfully saved to MongoDB Atlas!");
+    } else {
+      alert("Saved locally in browser session.");
+    }
+  } catch (e) {
+    alert("Saved locally in browser session.");
+  }
+
+  hydrateBeneficiaryProfile();
+}
+
+// 15. Download Official 5-Page Verified Roadmap PDF
+async function downloadOfficialRoadmapPdf() {
+  const user = getActiveUser();
+  const trade = nsqfTradeMatrix[currentTradeCode] || nsqfTradeMatrix["AMH/Q1947"];
+
+  try {
+    const res = await fetch('/api/simulate-intake', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        phone: user.identifier,
+        name: user.name,
+        district: user.district,
+        user_query: `Experienced ${trade.title} seeking PM-AJAY micro-enterprise grant and RPL certification.`
+      })
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data.generated_pdf_url) {
+        window.open(data.generated_pdf_url, '_blank');
+        return;
+      }
+    }
+  } catch (e) {
+    console.error("PDF generation error", e);
+  }
+  alert("Generating your certified PDF roadmap. Please check your download popup.");
+}
+
+// 16. Logout Handler
+function handleBeneficiaryLogout() {
+  localStorage.removeItem('karman_user');
+  localStorage.removeItem('karman_token');
+  localStorage.removeItem('karman_user_id');
+  localStorage.removeItem('karman_role');
+  window.location.href = 'login.html';
+}
+
+// 17. DOM Initializer (Dynamic Multi-User Hydration)
+document.addEventListener('DOMContentLoaded', () => {
+  initSidebarResizer();
+  hydrateBeneficiaryProfile();
   loadNewsroomData();
   switchBotChannel('whatsapp');
 });
@@ -1045,5 +1314,9 @@ if (typeof window !== 'undefined') {
   window.tgReply = tgReply;
   window.refreshNewsroomData = refreshNewsroomData;
   window.loadNewsroomData = loadNewsroomData;
+  window.getActiveUser = getActiveUser;
+  window.hydrateBeneficiaryProfile = hydrateBeneficiaryProfile;
+  window.saveUserProfileSettings = saveUserProfileSettings;
+  window.downloadOfficialRoadmapPdf = downloadOfficialRoadmapPdf;
+  window.handleBeneficiaryLogout = handleBeneficiaryLogout;
 }
-
