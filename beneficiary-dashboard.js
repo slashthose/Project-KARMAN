@@ -875,53 +875,74 @@ function sendTgUserMessage(text) {
   }, 450);
 }
 
-// 10. Newsroom Feed Loader
-async function loadNewsroomData() {
+// 10. Live Scheme Newsroom Loader & Live Poller
+async function refreshNewsroomData(force = false) {
+  const icon = document.getElementById('news-refresh-icon');
+  const btn = document.getElementById('btn-refresh-newsroom');
+  if (icon) {
+    icon.style.display = 'inline-block';
+    icon.style.transform = 'rotate(180deg)';
+    icon.style.transition = 'transform 0.4s ease';
+  }
+  if (btn) btn.disabled = true;
+
+  try {
+    await loadNewsroomData(force);
+  } finally {
+    if (icon) icon.style.transform = '';
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function loadNewsroomData(forceRefresh = false) {
   const container = document.getElementById('newsroom-list-container');
   if (!container) return;
 
-  container.innerHTML = `
-    <div class="table-card scheme-row gold" style="margin-bottom:12px; padding:18px 20px; border-left:4px solid #F4C542;">
-      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-        <div>
-          <span class="eyebrow" style="color:#B45309; font-weight:700;">PM-AJAY SPECIAL CENTRAL ASSISTANCE</span>
-          <h4 style="font-size:1.05rem; margin:4px 0;">PM-AJAY Livelihood Equipment Grant 2026 Guidelines Issued</h4>
-          <p style="font-size:0.84rem; color:var(--ink-sub); line-height:1.45;">Ministry of Social Justice & Empowerment clarifies 100% grant subsidy up to ₹50,000 for verified informal workers and SC artisans seeking self-employment machinery.</p>
-          <div style="font-size:0.72rem; color:#475569; margin-top:4px;">Verified Source: Gazette Notification MoSJE/2026/GIA-4.2 · District Gautam Buddha Nagar</div>
-        </div>
-        <span style="font-weight:800; color:var(--green-text); font-size:0.95rem; margin-left:14px; white-space:nowrap;">Up to ₹50,000</span>
-      </div>
-    </div>
+  if (forceRefresh) {
+    container.innerHTML = `
+      <div style="text-align:center; padding:36px 16px; color:var(--ink-sub);">
+        <div style="font-size:1.5rem; margin-bottom:8px;">⏳</div>
+        <strong style="font-size:0.95rem; display:block; margin-bottom:4px; color:var(--navy-dark);">Fetching Live Government Notifications...</strong>
+        <span style="font-size:0.8rem;">Querying Press Information Bureau (PIB), MSDE, and Skill India feeds</span>
+      </div>`;
+  }
 
-    <div class="table-card scheme-row" style="margin-bottom:12px; padding:18px 20px; border-left:4px solid var(--navy-dark);">
-      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-        <div>
-          <span class="eyebrow" style="color:var(--navy-dark); font-weight:700;">PMKVY 4.0 RECOGNITION OF PRIOR LEARNING</span>
-          <h4 style="font-size:1.05rem; margin:4px 0;">RPL Fast-Track Skill Orientation Camps Active in Sector 62 PMKK</h4>
-          <p style="font-size:0.84rem; color:var(--ink-sub); line-height:1.45;">12-hour orientation camps certifying informal experience with Skill India Digital QR credential and ₹500 DBT reward directly into Aadhaar bank account.</p>
-          <div style="font-size:0.72rem; color:#475569; margin-top:4px;">Nodal Partner: Pradhan Mantri Kaushal Kendra Noida</div>
+  try {
+    const items = await KarmanAPI.getNewsroom(forceRefresh);
+    if (items && items.length > 0) {
+      container.innerHTML = items.map((item, i) => `
+        <div class="scheme-row ${i === 0 ? 'gold' : ''}" onclick="window.open('${item.official_url}', '_blank')">
+          <div class="info">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
+              <span style="background:${item.is_live ? '#EAFBF1' : 'var(--blue-badge)'}; color:${item.is_live ? '#0E7B3E' : 'var(--blue-text)'}; border:1px solid ${item.is_live ? '#B7E9CB' : '#D0E1F4'}; font-size:.68rem; font-weight:700; padding:2px 9px; border-radius:9999px;">
+                ${item.is_live ? '● ' : ''}${item.badge || 'OFFICIAL NOTICE'}
+              </span>
+              <span style="font-size:.74rem; color:var(--ink-sub); font-weight:500;">
+                📅 ${item.published_date || 'Recent'}
+              </span>
+            </div>
+            <div class="name">${item.title}</div>
+            <div class="desc">${item.summary}</div>
+            <div style="display:flex; gap:14px; margin-top:10px; font-size:.76rem; color:#475569; flex-wrap:wrap;">
+              <span style="background:#F1F5F9; padding:2px 8px; border-radius:6px; font-weight:600;">🏛️ ${item.source_name || item.source_document || 'Govt Gazette'}</span>
+              <span style="background:#F8FAFC; padding:2px 8px; border-radius:6px; color:#334155;">🎯 <strong>Eligibility:</strong> ${item.relevant_to || 'National Beneficiaries'}</span>
+            </div>
+          </div>
+          <div style="text-align:right; min-width:145px; flex-shrink:0; display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+            <div class="amount">${item.amount || 'Govt Grant'}</div>
+            <a href="${item.official_url}" target="_blank" onclick="event.stopPropagation();" style="display:inline-flex; align-items:center; gap:4px; font-size:0.76rem; font-weight:600; padding:5px 12px; border-radius:6px; background:#FAF8F4; border:1px solid var(--border-light); color:var(--navy-dark); text-decoration:none; transition:all 0.15s ease;">
+              Official Notice ↗
+            </a>
+          </div>
         </div>
-        <span style="font-weight:800; color:var(--navy-dark); font-size:0.95rem; margin-left:14px; white-space:nowrap;">Free + ₹500</span>
-      </div>
-    </div>
-
-    <div class="table-card scheme-row" style="margin-bottom:12px; padding:18px 20px; border-left:4px solid #1E40AF;">
-      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-        <div>
-          <span class="eyebrow" style="color:#1E40AF; font-weight:700;">NSFDC CONCESSIONAL LENDING</span>
-          <h4 style="font-size:1.05rem; margin:4px 0;">Micro-Credit Finance Scheme at 6.0% Concessional Interest Rate</h4>
-          <p style="font-size:0.84rem; color:var(--ink-sub); line-height:1.45;">National Scheduled Castes Finance & Development Corporation launches balance term loans up to ₹1,00,000 for project costs exceeding the PM-AJAY grant.</p>
-          <div style="font-size:0.72rem; color:#475569; margin-top:4px;">Annual Interest: 6.0% (Saves 7-8% vs Commercial NBFCs)</div>
-        </div>
-        <span style="font-weight:800; color:#1E40AF; font-size:0.95rem; margin-left:14px; white-space:nowrap;">6.0% Interest</span>
-      </div>
-    </div>
-  `;
-}
-
-function refreshNewsroomData(isManual) {
-  loadNewsroomData();
-  if (isManual) alert("Gazette and District Welfare newsroom feed refreshed.");
+      `).join('');
+    } else {
+      container.innerHTML = '<p style="color:var(--ink-sub); font-size:.88rem;">No recent updates found. Click "Fetch Latest Govt News" above to retry.</p>';
+    }
+  } catch (err) {
+    console.warn("Could not fetch remote newsroom:", err);
+    container.innerHTML = '<p style="color:#DC2626; font-size:.88rem;">Unable to connect to live government feed. Please check internet connectivity and retry.</p>';
+  }
 }
 
 // 11. Language Toggle
@@ -1023,5 +1044,6 @@ if (typeof window !== 'undefined') {
   window.handleTgInputKey = handleTgInputKey;
   window.tgReply = tgReply;
   window.refreshNewsroomData = refreshNewsroomData;
+  window.loadNewsroomData = loadNewsroomData;
 }
 
