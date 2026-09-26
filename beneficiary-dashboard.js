@@ -1245,34 +1245,191 @@ async function saveUserProfileSettings() {
   hydrateBeneficiaryProfile();
 }
 
-// 15. Download Official 5-Page Verified Roadmap PDF
+// 15. Download Official 5-Page Verified Roadmap PDF (With Popup-Blocker Bypass & Toast UI)
+function showRoadmapNotification(htmlMsg, pdfUrl, isNotice = false) {
+  let toast = document.getElementById('karman-roadmap-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'karman-roadmap-toast';
+    toast.style.cssText = 'position:fixed; top:20px; right:24px; z-index:10000; background:#162035; color:#FFFFFF; padding:13px 18px; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,0.3); border-left:5px solid #F4C542; display:flex; align-items:center; gap:14px; font-size:0.84rem; max-width:480px; font-family:inherit;';
+    document.body.appendChild(toast);
+  }
+
+  let actionHtml = '';
+  if (pdfUrl) {
+    actionHtml = '<a href="' + pdfUrl + '" target="_blank" rel="noopener noreferrer" style="background:#F4C542; color:#162035; font-weight:700; padding:6px 14px; border-radius:6px; text-decoration:none; white-space:nowrap; display:inline-block; font-size:0.78rem;">Open PDF ↗</a>';
+  } else if (isNotice) {
+    actionHtml = '<button onclick="printActionCard()" style="background:#F4C542; color:#162035; font-weight:700; border:none; padding:6px 14px; border-radius:6px; cursor:pointer; font-size:0.78rem; white-space:nowrap;">Print Dossier</button>';
+  }
+
+  toast.innerHTML = '<div style="flex:1; line-height:1.45;">' + htmlMsg + '</div>' + actionHtml + '<button onclick="this.parentElement.style.display=\'none\'" style="background:transparent; border:none; color:#A6B4C9; font-size:1.1rem; cursor:pointer; padding:0 4px; line-height:1;" title="Dismiss">✕</button>';
+  toast.style.display = 'flex';
+
+  if (window._toastTimeout) clearTimeout(window._toastTimeout);
+  window._toastTimeout = setTimeout(() => {
+    if (toast) toast.style.display = 'none';
+  }, 10000);
+}
+
 async function downloadOfficialRoadmapPdf() {
   const user = getActiveUser();
-  const trade = nsqfTradeMatrix[currentTradeCode] || nsqfTradeMatrix["AMH/Q1947"];
+  const trade = nsqfTradeMatrix[currentTradeCode] || nsqfTradeMatrix['AMH/Q1947'];
 
-  try {
-    const res = await fetch('/api/simulate-intake', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        phone: user.identifier,
-        name: user.name,
-        district: user.district,
-        user_query: `Experienced ${trade.title} seeking PM-AJAY micro-enterprise grant and RPL certification.`
-      })
-    });
+  const btn = document.getElementById('btn-header-roadmap-pdf');
+  const icon = document.getElementById('btn-header-roadmap-icon');
+  const text = document.getElementById('btn-header-roadmap-text');
 
-    if (res.ok) {
-      const data = await res.json();
-      if (data.generated_pdf_url) {
-        window.open(data.generated_pdf_url, '_blank');
-        return;
+  // 1. Loading UI feedback
+  if (btn) {
+    btn.disabled = true;
+    btn.style.opacity = '0.85';
+    btn.style.borderColor = 'var(--saffron-primary)';
+  }
+  if (icon) icon.innerText = '⏳';
+  if (text) text.innerText = 'Generating PDF…';
+
+  // Determine potential API bases
+  const candidateBases = [];
+  if (typeof window !== 'undefined' && window.location) {
+    if (window.location.origin && window.location.origin.startsWith('http')) {
+      candidateBases.push(window.location.origin);
+    }
+  }
+  if (typeof KarmanAPI !== 'undefined' && KarmanAPI.getBaseUrl) {
+    try {
+      const kBase = KarmanAPI.getBaseUrl();
+      if (kBase && !candidateBases.includes(kBase)) candidateBases.push(kBase);
+    } catch(e) {}
+  }
+  if (!candidateBases.includes('http://localhost:8000')) {
+    candidateBases.push('http://localhost:8000');
+  }
+  if (!candidateBases.includes('https://project-karman.onrender.com')) {
+    candidateBases.push('https://project-karman.onrender.com');
+  }
+
+  let pdfUrl = null;
+  let success = false;
+
+  const payload = {
+    phone: user.identifier || '919876543210',
+    name: user.name || 'Beneficiary',
+    district: user.district || 'Gautam Buddha Nagar',
+    user_query: 'Experienced ' + trade.title + ' seeking PM-AJAY micro-enterprise grant and RPL certification.'
+  };
+
+  // 2. Query candidates via POST /api/simulate-intake
+  for (const base of candidateBases) {
+    try {
+      const url = base.replace(/\/+$/, '') + '/api/simulate-intake';
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.generated_pdf_url) {
+          pdfUrl = data.generated_pdf_url;
+          if (pdfUrl.startsWith('/')) {
+            pdfUrl = base.replace(/\/+$/, '') + pdfUrl;
+          }
+          success = true;
+          break;
+        }
+      }
+    } catch (err) {
+      // try next base
+    }
+  }
+
+  // 3. Fallback to direct GET download endpoint if simulate-intake didn't return url
+  if (!pdfUrl) {
+    for (const base of candidateBases) {
+      try {
+        const cleanName = encodeURIComponent(user.name || 'Beneficiary');
+        const cleanPhone = encodeURIComponent(user.identifier || '919876543210');
+        const cleanDist = encodeURIComponent(user.district || 'Gautam Buddha Nagar');
+        const cleanTrade = encodeURIComponent(trade.title);
+        const directUrl = base.replace(/\/+$/, '') + '/api/download-roadmap-pdf?phone=' + cleanPhone + '&name=' + cleanName + '&district=' + cleanDist + '&trade=' + cleanTrade;
+
+        const headRes = await fetch(directUrl, { method: 'HEAD' });
+        if (headRes.ok) {
+          pdfUrl = directUrl;
+          success = true;
+          break;
+        }
+      } catch (e) {
+        // try next base
       }
     }
-  } catch (e) {
-    console.error("PDF generation error", e);
   }
-  alert("Generating your certified PDF roadmap. Please check your download popup.");
+
+  // Reset button state
+  if (btn) {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+  }
+
+  if (success && pdfUrl) {
+    window.lastGeneratedPdfUrl = pdfUrl;
+    if (icon) icon.innerText = '✅';
+    if (text) text.innerText = 'Downloaded!';
+    if (btn) btn.style.borderColor = '#10B981';
+
+    // Trigger download via anchor element
+    try {
+      const a = document.createElement('a');
+      a.href = pdfUrl;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.download = 'KARMAN_Roadmap_' + (user.name || 'Beneficiary').replace(/\s+/g, '_') + '.pdf';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        if (a.parentNode) a.parentNode.removeChild(a);
+      }, 500);
+    } catch (e) {
+      window.open(pdfUrl, '_blank');
+    }
+
+    // Show floating toast with direct Open PDF link
+    showRoadmapNotification(
+      '🎉 Official 5-Page Verified Roadmap PDF generated for <strong>' + user.name + '</strong>!',
+      pdfUrl
+    );
+
+    setTimeout(() => {
+      if (icon) icon.innerText = '📄';
+      if (text) text.innerText = 'Roadmap PDF';
+      if (btn) btn.style.borderColor = 'var(--border-light)';
+    }, 3000);
+
+  } else {
+    // Offline fallback: open Action Card Modal with printable dossier
+    if (icon) icon.innerText = '📋';
+    if (text) text.innerText = 'Action Card';
+    if (btn) btn.style.borderColor = 'var(--saffron-primary)';
+
+    showRoadmapNotification(
+      'Backend server offline. Opening your official PM-AJAY Action Card & DPR dossier for instant printing/saving as PDF.',
+      null,
+      true
+    );
+    openActionCardModal();
+
+    setTimeout(() => {
+      if (icon) icon.innerText = '📄';
+      if (text) text.innerText = 'Roadmap PDF';
+      if (btn) btn.style.borderColor = 'var(--border-light)';
+    }, 4000);
+  }
 }
 
 // 16. Logout Handler
@@ -1317,6 +1474,7 @@ if (typeof window !== 'undefined') {
   window.getActiveUser = getActiveUser;
   window.hydrateBeneficiaryProfile = hydrateBeneficiaryProfile;
   window.saveUserProfileSettings = saveUserProfileSettings;
+  window.showRoadmapNotification = showRoadmapNotification;
   window.downloadOfficialRoadmapPdf = downloadOfficialRoadmapPdf;
   window.handleBeneficiaryLogout = handleBeneficiaryLogout;
 }

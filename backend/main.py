@@ -102,6 +102,45 @@ def get_api_js():
 def get_auth_js():
     return FileResponse(os.path.join(ROOT_DIR, "auth.js"), media_type="application/javascript")
 
+@app.get("/beneficiary-dashboard.html")
+def get_beneficiary_dashboard_html():
+    return FileResponse(os.path.join(ROOT_DIR, "beneficiary-dashboard.html"))
+
+@app.get("/beneficiary-dashboard.js")
+def get_beneficiary_dashboard_js():
+    return FileResponse(os.path.join(ROOT_DIR, "beneficiary-dashboard.js"), media_type="application/javascript")
+
+@app.get("/student-dashboard.html")
+def get_student_dashboard_html():
+    return FileResponse(os.path.join(ROOT_DIR, "student-dashboard.html"))
+
+@app.get("/student-dashboard.js")
+def get_student_dashboard_js():
+    return FileResponse(os.path.join(ROOT_DIR, "student-dashboard.js"), media_type="application/javascript")
+
+@app.get("/api/download-roadmap-pdf")
+async def download_roadmap_pdf(
+    phone: str = "9876543210",
+    name: str = "Beneficiary",
+    district: str = "Gautam Buddha Nagar",
+    trade: str = "Tailoring & Garment Manufacturing"
+):
+    result = process_beneficiary_query(
+        user_query=f"Experienced {trade} seeking PM-AJAY micro-enterprise grant and RPL certification.",
+        phone_number=phone,
+        name=name,
+        district=district
+    )
+    pdf_path = generate_applicant_pdf(result)
+    filename = os.path.basename(pdf_path)
+    clean_name = re.sub(r'[^a-zA-Z0-9_-]', '_', name.strip()) or "Beneficiary"
+    return FileResponse(
+        pdf_path,
+        media_type="application/pdf",
+        filename=f"KARMAN_Roadmap_{clean_name}_{filename}",
+        headers={"Content-Disposition": f'attachment; filename="KARMAN_Roadmap_{clean_name}.pdf"'}
+    )
+
 PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "http://localhost:8000")
 
 # ==========================================
@@ -397,7 +436,7 @@ async def user_login(req: LoginRequest):
 # ==========================================
 
 @app.post("/api/simulate-intake")
-async def simulate_intake(req: IntakeRequest):
+async def simulate_intake(req: IntakeRequest, request: Request = None):
     phone = req.phone.strip()
     result = process_beneficiary_query(
         user_query=req.user_query,
@@ -407,7 +446,17 @@ async def simulate_intake(req: IntakeRequest):
     )
     pdf_path = generate_applicant_pdf(result)
     pdf_filename = os.path.basename(pdf_path)
-    result["generated_pdf_url"] = f"{PUBLIC_BASE_URL}/static/{pdf_filename}"
+
+    base = PUBLIC_BASE_URL
+    if request:
+        try:
+            req_base = str(request.base_url).rstrip('/')
+            if "localhost" in PUBLIC_BASE_URL or not os.getenv("PUBLIC_BASE_URL"):
+                base = req_base
+        except Exception:
+            pass
+
+    result["generated_pdf_url"] = f"{base}/static/{pdf_filename}"
     result["timestamp"] = datetime.utcnow().isoformat()
 
     # Persist applicant submission directly to MongoDB Atlas
