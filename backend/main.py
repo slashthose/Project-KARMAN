@@ -131,13 +131,18 @@ async def download_roadmap_pdf(
         name=name,
         district=district
     )
+    if name and name.strip():
+        result["name"] = name.strip()
+        if "profile" in result and isinstance(result["profile"], dict):
+            result["profile"]["name"] = name.strip()
+
     pdf_path = generate_applicant_pdf(result)
     filename = os.path.basename(pdf_path)
     clean_name = re.sub(r'[^a-zA-Z0-9_-]', '_', name.strip()) or "Beneficiary"
     return FileResponse(
         pdf_path,
         media_type="application/pdf",
-        filename=f"KARMAN_Roadmap_{clean_name}_{filename}",
+        filename=filename,
         headers={"Content-Disposition": f'attachment; filename="KARMAN_Roadmap_{clean_name}.pdf"'}
     )
 
@@ -444,6 +449,11 @@ async def simulate_intake(req: IntakeRequest, request: Request = None):
         name=req.name,
         district=req.district
     )
+    if req.name and req.name.strip():
+        result["name"] = req.name.strip()
+        if "profile" in result and isinstance(result["profile"], dict):
+            result["profile"]["name"] = req.name.strip()
+
     pdf_path = generate_applicant_pdf(result)
     pdf_filename = os.path.basename(pdf_path)
 

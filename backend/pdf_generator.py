@@ -1,5 +1,6 @@
 import os
 import hashlib
+import re
 from datetime import datetime
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
@@ -81,9 +82,14 @@ def generate_applicant_pdf(applicant_data: dict) -> str:
     - Border Light: #E2DCD0
     """
     applicant_id = applicant_data.get("applicant_id", "919876543210")
+    profile = applicant_data.get("profile", {})
+    applicant_name = applicant_data.get("name") or profile.get("name") or "Beneficiary"
+    clean_name = re.sub(r'[^a-zA-Z0-9_-]', '_', applicant_name.strip()) or "Beneficiary"
+    clean_id = re.sub(r'\D', '', str(applicant_id)) or "919876543210"
+
     raw_query = applicant_data.get("original_audio_intent") or applicant_data.get("translated_text") or applicant_data.get("extracted_skill", "vocational")
     query_hash = hashlib.md5(f"{applicant_id}_{raw_query}".encode('utf-8')).hexdigest()[:8]
-    pdf_filename = f"Roadmap_{applicant_id}_{query_hash}.pdf"
+    pdf_filename = f"Roadmap_{clean_name}_{clean_id[-4:]}_{query_hash}.pdf"
     file_path = os.path.join(STATIC_DIR, pdf_filename)
 
     doc = SimpleDocTemplate(
@@ -92,7 +98,11 @@ def generate_applicant_pdf(applicant_data: dict) -> str:
         rightMargin=36,
         leftMargin=36,
         topMargin=42,
-        bottomMargin=46
+        bottomMargin=46,
+        title=f"Project KARMAN Roadmap — {applicant_name}",
+        author="Project KARMAN (AIC-GBU / SIH 2026)",
+        subject=f"Official 5-Page Verified Livelihood & PM-AJAY Roadmap for {applicant_name}",
+        creator="Project KARMAN AI Engine"
     )
 
     styles = getSampleStyleSheet()
@@ -194,7 +204,7 @@ def generate_applicant_pdf(applicant_data: dict) -> str:
     # ==========================================
     # PAGE 1: PERSONALIZED CAREER ROADMAP
     # ==========================================
-    elements.append(make_web_header("Career Lab Report", "Personalized Career & Support Roadmap"))
+    elements.append(make_web_header("Career Lab Report", f"Personalized Career & Support Roadmap — {name}"))
     elements.append(Spacer(1, 10))
 
     # Metric summary strip inspired by website hero score
@@ -637,7 +647,9 @@ def generate_skill_resume_pdf(resume_data: dict) -> str:
     """
     phone = resume_data.get("phone", "919876543210")
     clean_id = "".join(filter(str.isdigit, str(phone))) or "919876543210"
-    pdf_filename = f"SkillPass_{clean_id}.pdf"
+    name = resume_data.get("name") or "Applicant"
+    clean_name = re.sub(r'[^a-zA-Z0-9_-]', '_', name.strip()) or "Applicant"
+    pdf_filename = f"SkillPass_{clean_name}_{clean_id[-4:]}.pdf"
     file_path = os.path.join(STATIC_DIR, pdf_filename)
 
     doc = SimpleDocTemplate(
@@ -646,7 +658,11 @@ def generate_skill_resume_pdf(resume_data: dict) -> str:
         rightMargin=36,
         leftMargin=36,
         topMargin=36,
-        bottomMargin=36
+        bottomMargin=36,
+        title=f"Project KARMAN Skill Pass — {name}",
+        author="Project KARMAN (AIC-GBU / SIH 2026)",
+        subject=f"National Skill Pass and Verifiable ATS Profile for {name}",
+        creator="Project KARMAN AI Engine"
     )
 
     styles = getSampleStyleSheet()
